@@ -1,0 +1,347 @@
+/* ── Google Fonts ──────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties ─────────────────────────────── */
+:root {
+    --cream:        #F5F0E8;
+    --cream-dark:   #ede7db;
+    --cream-white:  #FDFCFA;
+    --green:        #1A3D2E;
+    --green2:       #2a5a44;
+    --green-dark:   #0f2a1e;
+    --green-light:  #EAF3DE;
+    --gold:         #C9A84C;
+    --gold2:        #dbb85a;
+    --gold-dark:    #a88330;
+    --gold-light:   #FDF6E3;
+    --text:         #1C1C1A;
+    --text-muted:   #6B7280;
+    --white:        #FFFFFF;
+    --radius:       0.75rem;
+    --radius-lg:    1rem;
+    --radius-xl:    1.5rem;
+}
+
+/* ── Base ──────────────────────────────────────────────── */
+@layer base {
+    html {
+        font-family: 'DM Sans', sans-serif;
+        scroll-behavior: smooth;
+    }
+    body {
+        background-color: var(--cream);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Playfair Display', serif;
+        letter-spacing: -0.02em;
+    }
+
+    /* Numbers / currency use DM Mono */
+    .font-mono, [data-currency], .currency-value {
+        font-family: 'DM Mono', monospace;
+    }
+
+    *:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 2px;
+    }
+}
+
+/* ── Button System ─────────────────────────────────────── */
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium text-sm
+               transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+               disabled:opacity-50 disabled:cursor-not-allowed select-none;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Primary — Green */
+    .btn-primary {
+        @apply btn text-white;
+        background-color: var(--green);
+        &:hover { background-color: var(--green2); transform: translateY(-1px); }
+        &:active { transform: translateY(0); }
+        &:focus { --tw-ring-color: var(--green); }
+    }
+
+    /* Gold / CTA */
+    .btn-gold {
+        @apply btn text-white font-semibold;
+        background-color: var(--gold);
+        box-shadow: 0 4px 16px rgb(201 168 76 / 0.35);
+        &:hover { background-color: var(--gold2); transform: translateY(-2px); box-shadow: 0 6px 20px rgb(201 168 76 / 0.45); }
+        &:active { transform: translateY(0); }
+        &:focus { --tw-ring-color: var(--gold); }
+    }
+
+    /* Secondary — outline green */
+    .btn-secondary {
+        @apply btn border-2;
+        color: var(--green);
+        border-color: var(--green);
+        background-color: transparent;
+        &:hover { background-color: var(--green); color: white; transform: translateY(-1px); }
+        &:focus { --tw-ring-color: var(--green); }
+    }
+
+    /* Outline cream (on dark bg) */
+    .btn-outline-cream {
+        @apply btn border-2;
+        color: var(--cream);
+        border-color: rgba(245,240,232,0.5);
+        background-color: transparent;
+        &:hover { background-color: rgba(245,240,232,0.1); border-color: var(--cream); }
+        &:focus { --tw-ring-color: var(--cream); }
+    }
+
+    .btn-outline {
+        @apply btn border border-gray-300 text-gray-700 bg-white;
+        &:hover { @apply bg-gray-50 border-gray-400; }
+        &:focus { --tw-ring-color: #9CA3AF; }
+    }
+
+    .btn-danger  { @apply btn text-white; background-color: #991B1B; &:hover { background-color: #7f1d1d; } }
+    .btn-success { @apply btn text-white; background-color: #065F46; &:hover { background-color: #064e3b; } }
+    .btn-ghost   { @apply btn text-gray-600 hover:bg-gray-100; }
+
+    .btn-sm  { @apply text-xs px-3 py-1.5; }
+    .btn-lg  { @apply text-base px-6 py-3; }
+    .btn-xl  { @apply text-base px-8 py-4 rounded-2xl; }
+    .btn-icon { @apply p-2; }
+
+    /* ── Card System ───────────────────────────────────── */
+    .card {
+        background-color: var(--white);
+        @apply rounded-xl2 border border-gray-100;
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+    }
+    .card-hover {
+        @apply card transition-all duration-200 cursor-pointer;
+        &:hover {
+            box-shadow: 0 8px 25px -5px rgb(0 0 0 / 0.10), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+            transform: translateY(-2px);
+        }
+    }
+    .card-green {
+        background-color: var(--green);
+        @apply rounded-xl2 border-0 text-white;
+    }
+    .card-cream {
+        background-color: var(--cream);
+        @apply rounded-xl2 border border-cream-dark;
+    }
+    .card-gold {
+        background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+        @apply rounded-xl2 border-0 text-white;
+    }
+
+    /* ── Form Elements ─────────────────────────────────── */
+    .form-label {
+        @apply block text-sm font-medium mb-1;
+        color: var(--text);
+    }
+    .form-input {
+        @apply w-full rounded-xl border text-sm transition-all duration-150;
+        border-color: #D1D5DB;
+        background-color: var(--cream-white, #FDFCFA);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        &:focus {
+            border-color: var(--green);
+            --tw-ring-color: var(--green);
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 3px rgb(26 61 46 / 0.12);
+        }
+    }
+    .form-error { @apply text-xs mt-1; color: #991B1B; }
+    .form-hint  { @apply text-xs mt-1; color: var(--text-muted); }
+
+    /* ── Badge System ──────────────────────────────────── */
+    .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .badge-success  { @apply badge; background-color: #D1FAE5; color: #065F46; }
+    .badge-danger   { @apply badge; background-color: #FEE2E2; color: #991B1B; }
+    .badge-warning  { @apply badge; background-color: #FEF3C7; color: #92400E; }
+    .badge-info     { @apply badge; background-color: #DBEAFE; color: #1E40AF; }
+    .badge-gray     { @apply badge; background-color: #F3F4F6; color: #374151; }
+    .badge-primary  { @apply badge; background-color: var(--green-light); color: var(--green); }
+    .badge-purple   { @apply badge; background-color: #EDE9FE; color: #5B21B6; }
+    .badge-gold     { @apply badge; background-color: var(--gold-light); color: var(--gold-dark); }
+
+    /* ── Data Table ────────────────────────────────────── */
+    .table-base { @apply w-full text-sm text-left; }
+    .table-base thead tr { @apply border-b border-gray-200; background-color: var(--cream); }
+    .table-base thead th { @apply px-4 py-3 text-xs font-semibold uppercase tracking-wider; color: var(--text-muted); }
+    .table-base tbody tr { @apply border-b border-gray-100 transition-colors duration-100; &:hover { background-color: var(--cream); } }
+    .table-base tbody td { @apply px-4 py-3; color: var(--text); }
+
+    /* ── Stat Cards ────────────────────────────────────── */
+    .stat-card {
+        @apply card p-5 flex flex-col gap-2;
+    }
+    .stat-card .stat-label  { @apply text-xs font-medium uppercase tracking-wider; color: var(--text-muted); }
+    .stat-card .stat-value  { @apply text-2xl font-bold; color: var(--text); font-family: 'DM Mono', monospace; }
+    .stat-card .stat-change { @apply text-xs font-medium; }
+
+    /* ── Sidebar Navigation ─────────────────────────────── */
+    .sidebar-link {
+        @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150;
+        color: #5a7a66;
+    }
+    .sidebar-link.active {
+        background-color: var(--green);
+        color: white;
+    }
+    .sidebar-link:not(.active) {
+        &:hover { background-color: var(--green-light); color: var(--green); }
+    }
+
+    /* ── Typography helpers ───────────────────────────────── */
+    .page-title {
+        @apply text-xl font-semibold;
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+    }
+    .section-title {
+        @apply text-base font-semibold;
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+    }
+    .heading-serif {
+        font-family: 'Playfair Display', serif;
+        color: var(--text);
+    }
+    .currency {
+        font-family: 'DM Mono', monospace;
+        font-feature-settings: 'tnum';
+    }
+
+    /* ── Modal ─────────────────────────────────────────── */
+    .modal-backdrop {
+        @apply fixed inset-0 z-40;
+        background-color: rgb(28 28 26 / 0.5);
+        backdrop-filter: blur(4px);
+    }
+    .modal-box {
+        @apply fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-xl2 w-full max-w-md p-6;
+        box-shadow: 0 25px 60px rgb(0 0 0 / 0.2);
+        animation: slideDown .2s ease-out;
+    }
+
+    /* ── Toast ─────────────────────────────────────────── */
+    .toast {
+        @apply fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium;
+        box-shadow: 0 10px 30px rgb(0 0 0 / 0.15);
+        animation: slideDown .2s ease-out;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .toast-success { @apply toast text-white; background-color: #065F46; }
+    .toast-danger  { @apply toast text-white; background-color: #991B1B; }
+    .toast-warning { @apply toast text-white; background-color: #92400E; }
+    .toast-info    { @apply toast text-white; background-color: #1E40AF; }
+    .toast-gold    { @apply toast text-white; background-color: var(--gold); }
+
+    /* ── Skeleton ──────────────────────────────────────── */
+    .skeleton { @apply animate-pulse rounded-lg; background-color: var(--cream-dark); }
+
+    /* ── Landing-specific components ──────────────────── */
+    .section-tag {
+        @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest;
+        background-color: var(--gold-light);
+        color: var(--gold-dark);
+        border: 1px solid rgba(201,168,76,0.3);
+    }
+    .section-tag-green {
+        @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest;
+        background-color: var(--green-light);
+        color: var(--green);
+    }
+
+    .step-number {
+        @apply w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg flex-shrink-0;
+        background-color: var(--green);
+        color: white;
+        font-family: 'Playfair Display', serif;
+    }
+    .step-connector {
+        @apply absolute left-6 top-12 w-px;
+        height: calc(100% + 1rem);
+        background: linear-gradient(to bottom, var(--green) 0%, transparent 100%);
+    }
+
+    .feature-card {
+        @apply rounded-2xl p-6 transition-all duration-300;
+        background-color: var(--white);
+        border: 1px solid rgba(26,61,46,0.08);
+        &:hover {
+            box-shadow: 0 12px 32px rgb(26 61 46 / 0.10);
+            transform: translateY(-4px);
+            border-color: rgba(26,61,46,0.15);
+        }
+    }
+    .feature-icon {
+        @apply w-12 h-12 rounded-2xl flex items-center justify-center mb-4;
+        background-color: var(--green-light);
+    }
+
+    /* ── Scroll reveal ─────────────────────────────────── */
+    .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .reveal-left {
+        opacity: 0;
+        transform: translateX(-28px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .reveal-left.visible {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    .reveal-right {
+        opacity: 0;
+        transform: translateX(28px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .reveal-right.visible {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* stagger delay helpers */
+    .delay-100 { transition-delay: 100ms; }
+    .delay-200 { transition-delay: 200ms; }
+    .delay-300 { transition-delay: 300ms; }
+    .delay-400 { transition-delay: 400ms; }
+    .delay-500 { transition-delay: 500ms; }
+
+    /* ── Misc ──────────────────────────────────────────── */
+    .scrollbar-hide { scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .gradient-green { background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%); }
+    .gradient-gold  { background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%); }
+    .gradient-text-gold {
+        background: linear-gradient(135deg, var(--gold), var(--gold2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .text-balance { text-wrap: balance; }
+}
