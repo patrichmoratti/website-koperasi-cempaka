@@ -3,14 +3,23 @@
 $title = 'Riwayat Transaksi';
 @endphp
 @section('content')
-<h1 class="page-title mb-6">Riwayat Transaksi</h1>
+<div x-data="{
+    detailOpen: false,
+    detailData: { title: '', subtitle: '', status: 'pending', statusLabel: '', rows: [], note: null, link: null },
+    openDetail(data) {
+        this.detailData = data;
+        this.detailOpen = true;
+    }
+}">
+
+<h1 class="text-2xl font-bold text-mony-text tracking-tight mb-6">Riwayat Transaksi</h1>
 
 <div class="card p-4 mb-4">
     <form method="GET" class="flex flex-wrap gap-3 items-end">
         <div>
             <label class="form-label">Filter</label>
             <select name="filter" class="form-input">
-                @foreach(['semua'=>'Semua','gadai'=>'Gadai','pembayaran'=>'Pembayaran','simpanan'=>'Simpanan'] as $k => $v)
+                @foreach(['semua'=>'Semua','gadai'=>'Gadai','pembayaran'=>'Pembayaran Gadai','simpanan'=>'Simpanan'] as $k => $v)
                     <option value="{{ $k }}" @selected($filter === $k)>{{ $v }}</option>
                 @endforeach
             </select>
@@ -30,7 +39,8 @@ $title = 'Riwayat Transaksi';
 @if($riwayat->count())
     <div class="space-y-3">
         @foreach($riwayat as $item)
-        <div class="card p-4 flex items-center gap-4 {{ $item->url ? 'hover:shadow-card-hover transition-shadow' : '' }}">
+        <div @click="openDetail(@js($item->detail))"
+             class="card p-4 flex items-center gap-4 cursor-pointer hover:shadow-card-hover transition-shadow">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
                 {{ ['gadai'=>'bg-green-100','pembayaran'=>'bg-yellow-100','simpanan'=>'bg-blue-100'][$item->type] ?? 'bg-gray-100' }}">
                 @if($item->type === 'gadai')
@@ -49,11 +59,9 @@ $title = 'Riwayat Transaksi';
                 <p class="font-semibold text-sm">Rp {{ number_format($item->amount, 0, ',', '.') }}</p>
                 <span class="badge-{{ $item->color ?? 'gray' }} text-xs">{{ $item->status }}</span>
             </div>
-            @if($item->url)
-                <a href="{{ $item->url }}" class="btn-ghost btn-sm btn-icon flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
-            @endif
+            <div class="flex-shrink-0 text-mony-muted">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
         </div>
         @endforeach
     </div>
@@ -63,4 +71,8 @@ $title = 'Riwayat Transaksi';
         <p>Belum ada riwayat transaksi</p>
     </div>
 @endif
+
+@include('partials.payment-detail-modal')
+
+</div>{{-- end x-data --}}
 @endsection

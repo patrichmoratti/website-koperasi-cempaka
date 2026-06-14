@@ -64,7 +64,14 @@ $title = 'Bayar Gadai';
 
         {{-- Month selection (bunga only) --}}
         <div x-show="type === 'bunga'" class="space-y-3">
-            <label class="form-label">Pilih Bulan yang Dibayar</label>
+            <div class="flex items-center justify-between">
+                <label class="form-label mb-0">Pilih Bulan yang Dibayar</label>
+                <span class="text-xs text-mony-muted">JT saat ini: <strong>{{ $transaksi->due_date->format('d M Y') }}</strong></span>
+            </div>
+            <div class="p-3 rounded-xl text-xs flex items-start gap-2" style="background:#fff7ed; border:1px solid #fed7aa; color:#9a3412;">
+                <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Setiap pembayaran bunga dikonfirmasi, jatuh tempo diperpanjang otomatis <strong>4 bulan ke depan</strong>. Jika tidak membayar bunga selama <strong>4 bulan berturut-turut</strong>, barang akan diproses untuk dilelang.</span>
+            </div>
             <div class="grid grid-cols-3 gap-2">
                 @php
                     $paidMonths = $transaksi->pembayaran()
@@ -73,9 +80,11 @@ $title = 'Bayar Gadai';
                         ->get()
                         ->flatMap(fn($p) => $p->paid_months ?? [])
                         ->unique()->values()->toArray();
+                    $cursor = $transaksi->pawn_date->copy()->addMonth()->startOfMonth();
+                    $endMonth = $transaksi->due_date->copy()->startOfMonth();
                 @endphp
-                @for($i = 0; $i < 4; $i++)
-                    @php $month = $transaksi->pawn_date->copy()->addMonths($i)->format('Y-m') @endphp
+                @while($cursor->lte($endMonth))
+                    @php $month = $cursor->format('Y-m') @endphp
                     <label class="cursor-pointer">
                         <input type="checkbox" name="paid_months[]" value="{{ $month }}"
                                x-model="months"
@@ -94,7 +103,8 @@ $title = 'Bayar Gadai';
                             @endif
                         </div>
                     </label>
-                @endfor
+                    @php $cursor->addMonth() @endphp
+                @endwhile
             </div>
         </div>
 
@@ -129,7 +139,7 @@ $title = 'Bayar Gadai';
         </div>
 
         <button type="submit" class="btn-primary w-full py-3"
-                onclick="return confirm('Kirim bukti pembayaran ini?')">
+                onclick="return confirmAction(event, 'Kirim bukti pembayaran ini?', 'Ya, Kirim')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Kirim Bukti Pembayaran
         </button>

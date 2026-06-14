@@ -8,28 +8,38 @@ $title = 'Dashboard';
     <p class="text-sm text-mony-muted mt-1">Selamat datang di MONY — layanan gadai koperasi Anda</p>
 </div>
 
-{{-- KPI Cards --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card">
-        <span class="stat-label">Gadai Aktif</span>
-        <span class="stat-value text-3xl">{{ $totalGadai }}</span>
-        <span class="text-xs text-mony-muted">Rp {{ number_format($totalPinjaman, 0, ',', '.') }}</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-label">Total Simpanan</span>
-        <span class="stat-value text-xl">Rp {{ number_format($totalSimpanan, 0, ',', '.') }}</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-label">SHU Tahun Ini</span>
-        <span class="stat-value text-xl {{ $shuTahunIni > 0 ? 'text-primary' : '' }}">
-            Rp {{ number_format($shuTahunIni, 0, ',', '.') }}
-        </span>
-    </div>
-    <div class="stat-card {{ $tagihan > 0 ? 'border-l-4 border-yellow-400' : '' }}">
-        <span class="stat-label">Tagihan Bunga Bulan Ini</span>
-        <span class="stat-value text-xl {{ $tagihan > 0 ? 'text-yellow-600' : '' }}">
-            Rp {{ number_format($tagihan, 0, ',', '.') }}
-        </span>
+{{-- KPI Strip --}}
+<div class="card p-0 mb-6 overflow-hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-3">
+        <div class="flex items-center gap-3 p-5 border-b sm:border-b-0 sm:border-r" style="border-color:#eef3ea">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--green-light)">
+                <svg class="w-5 h-5" style="color:var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs text-mony-muted">Gadai Aktif</p>
+                <p class="text-xl font-bold text-mony-text leading-tight">{{ $totalGadai }} <span class="text-xs font-normal text-mony-muted">· Rp {{ number_format($totalPinjaman, 0, ',', '.') }}</span></p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 p-5 border-b sm:border-b-0 sm:border-r" style="border-color:#eef3ea">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#e7f0fb">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs text-mony-muted">Total Simpanan</p>
+                <p class="text-xl font-bold text-mony-text leading-tight">Rp {{ number_format($totalSimpanan, 0, ',', '.') }}</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 p-5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:{{ $tagihan > 0 ? '#fef3c7' : 'var(--green-light)' }}">
+                <svg class="w-5 h-5 {{ $tagihan > 0 ? 'text-yellow-600' : '' }}" style="{{ $tagihan > 0 ? '' : 'color:var(--green)' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs text-mony-muted">Tagihan Bunga Bulan Ini</p>
+                <p class="text-xl font-bold leading-tight {{ $tagihan > 0 ? 'text-yellow-600' : 'text-mony-text' }}">Rp {{ number_format($tagihan, 0, ',', '.') }}</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -44,28 +54,33 @@ $title = 'Dashboard';
         @if($gadaiAktif->count())
             <div class="space-y-3">
                 @foreach($gadaiAktif as $g)
-                <div class="p-4 rounded-xl border" style="background: var(--cream); border-color: rgba(26,61,46,0.08)">
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="font-medium text-sm" style="color: var(--text)">{{ $g->jenisBarang?->name }}</p>
-                        <span class="badge-{{ $g->status_color }}">{{ $g->status_label }}</span>
-                    </div>
-                    <p class="text-xs font-mono mb-2" style="color: var(--text-muted)">{{ $g->reference_number }}</p>
-                    <div class="flex items-center justify-between text-sm">
-                        <span style="color: var(--text)">Pinjaman: <strong>Rp {{ number_format($g->loan_amount, 0, ',', '.') }}</strong></span>
-                        <span class="{{ $g->isOverdue() ? 'text-red-600 font-medium' : '' }}" style="{{ $g->isOverdue() ? '' : 'color: var(--text-muted)' }}">
-                            @if($g->isOverdue())
-                                Lewat {{ abs($g->daysUntilDue()) }} hari!
-                            @else
-                                {{ $g->daysUntilDue() }} hari lagi
+                <div x-data="{ open: false }">
+                    <div @click="open = true"
+                         class="p-4 rounded-xl border cursor-pointer hover:shadow-card-hover transition-shadow" style="background: var(--cream); border-color: rgba(26,61,46,0.08)">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="font-medium text-sm" style="color: var(--text)">{{ $g->jenisBarang?->name }}</p>
+                            <span class="badge-{{ $g->status_color }}">{{ $g->status_label }}</span>
+                        </div>
+                        <p class="text-xs font-mono mb-2" style="color: var(--text-muted)">{{ $g->reference_number }}</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span style="color: var(--text)">Pinjaman: <strong>Rp {{ number_format($g->loan_amount, 0, ',', '.') }}</strong></span>
+                            <span class="{{ $g->isOverdue() ? 'text-red-600 font-medium' : '' }}" style="{{ $g->isOverdue() ? '' : 'color: var(--text-muted)' }}">
+                                @if($g->isOverdue())
+                                    Lewat {{ abs($g->daysUntilDue()) }} hari!
+                                @else
+                                    {{ $g->daysUntilDue() }} hari lagi
+                                @endif
+                            </span>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <a href="{{ route('anggota.gadai.detail', $g) }}" @click.stop class="btn-outline btn-sm flex-1 text-center">Detail</a>
+                            @if($g->status === 'aktif')
+                                <a href="{{ route('anggota.gadai.bayar', $g) }}" @click.stop class="btn-primary btn-sm flex-1 text-center">Bayar</a>
                             @endif
-                        </span>
+                        </div>
                     </div>
-                    <div class="flex gap-2 mt-3">
-                        <a href="{{ route('anggota.gadai.detail', $g) }}" class="btn-outline btn-sm flex-1 text-center">Detail</a>
-                        @if($g->status === 'aktif')
-                            <a href="{{ route('anggota.gadai.bayar', $g) }}" class="btn-primary btn-sm flex-1 text-center">Bayar</a>
-                        @endif
-                    </div>
+
+                    @include('anggota.gadai._popup_nota', ['t' => $g])
                 </div>
                 @endforeach
             </div>
@@ -89,14 +104,18 @@ $title = 'Dashboard';
         @if($recentNotif->count())
             <div class="space-y-2">
                 @foreach($recentNotif as $notif)
-                <div class="flex items-start gap-3 p-3 rounded-xl" style="{{ !$notif->is_read ? 'background: var(--green-light)' : 'background: var(--cream)' }}">
+                <form method="POST" action="{{ route('anggota.notifikasi.read', $notif) }}"
+                      class="flex items-start gap-3 p-3 rounded-xl transition-colors {{ !$notif->is_read ? 'cursor-pointer hover:opacity-80' : '' }}"
+                      style="{{ !$notif->is_read ? 'background: var(--green-light)' : 'background: var(--cream)' }}"
+                      @if(!$notif->is_read) onclick="this.requestSubmit()" @endif>
+                    @csrf
                     <div class="w-2 h-2 rounded-full mt-1 flex-shrink-0 {{ ['mendesak'=>'bg-red-500','pengingat'=>'bg-yellow-500','update'=>'bg-blue-500'][$notif->category] ?? 'bg-gray-400' }}"></div>
                     <div class="min-w-0">
                         <p class="text-xs font-medium" style="color: var(--text)">{{ $notif->title }}</p>
                         <p class="text-xs mt-0.5" style="color: var(--text-muted)">{{ Str::limit($notif->message, 55) }}</p>
                         <p class="text-xs mt-1" style="color: var(--text-muted)">{{ $notif->created_at->diffForHumans() }}</p>
                     </div>
-                </div>
+                </form>
                 @endforeach
             </div>
         @else

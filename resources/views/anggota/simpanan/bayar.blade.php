@@ -11,7 +11,7 @@ $title = 'Bayar Simpanan';
     <h1 class="page-title">Bayar Simpanan</h1>
 </div>
 
-<div class="max-w-lg" x-data="{ type: 'wajib' }">
+<div class="max-w-lg" x-data="{ type: 'wajib', amount: 10000 }" x-init="$watch('type', v => amount = v === 'pokok' ? 50000 : 10000)">
     <form method="POST" action="{{ route('anggota.simpanan.bayar.store') }}" enctype="multipart/form-data"
           class="card p-6 space-y-5">
         @csrf
@@ -23,20 +23,20 @@ $title = 'Bayar Simpanan';
                     <input type="radio" name="type" value="wajib" x-model="type" class="hidden peer">
                     <div class="peer-checked:ring-2 peer-checked:ring-primary peer-checked:bg-primary/5 border border-gray-200 rounded-xl p-4 text-center hover:border-primary transition-all">
                         <p class="font-medium">Simpanan Wajib</p>
-                        <p class="text-xs text-mony-muted">Rp 100.000/bulan</p>
+                        <p class="text-xs text-mony-muted">Rp 10.000 (sekali, anggota resmi)</p>
                     </div>
                 </label>
                 <label class="cursor-pointer">
                     <input type="radio" name="type" value="pokok" x-model="type" class="hidden peer">
                     <div class="peer-checked:ring-2 peer-checked:ring-primary peer-checked:bg-primary/5 border border-gray-200 rounded-xl p-4 text-center hover:border-primary transition-all">
                         <p class="font-medium">Simpanan Pokok</p>
-                        <p class="text-xs text-mony-muted">Rp 500.000 (sekali)</p>
+                        <p class="text-xs text-mony-muted">Min. Rp 50.000/bulan</p>
                     </div>
                 </label>
             </div>
         </div>
 
-        <div x-show="type === 'wajib'" class="grid grid-cols-2 gap-4">
+        <div x-show="type === 'pokok'" class="grid grid-cols-2 gap-4">
             <div>
                 <label class="form-label">Bulan</label>
                 <select name="period_month" class="form-input">
@@ -59,9 +59,12 @@ $title = 'Bayar Simpanan';
 
         <div>
             <label class="form-label">Jumlah (Rp)</label>
-            <input type="number" name="amount"
-                   :value="type === 'pokok' ? 500000 : 100000"
-                   class="form-input" min="1" required>
+            <input type="number" name="amount" x-model.number="amount"
+                   :min="type === 'pokok' ? 50000 : 10000"
+                   :readonly="type === 'wajib'"
+                   class="form-input" required>
+            <p class="form-hint" x-show="type === 'wajib'">Nominal tetap — dibayar sekali di awal sebagai anggota resmi</p>
+            <p class="form-hint" x-show="type === 'pokok'">Minimal Rp 50.000, boleh menabung lebih sesuai kemampuan</p>
         </div>
 
         <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm">
