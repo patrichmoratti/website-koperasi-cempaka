@@ -7,7 +7,7 @@
     <title>{{ $title ?? 'Admin' }} &mdash; MONY KSP</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full font-sans" style="background: var(--cream)"
+<body class="h-full font-sans app-layout" style="background: var(--green)"
       x-data="{ sidebarOpen: window.innerWidth >= 1024 }"
       @resize.window="sidebarOpen = window.innerWidth >= 1024">
 
@@ -20,11 +20,7 @@
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
         <div class="flex items-center gap-3 px-5 py-4 border-b" style="border-color: rgba(26,61,46,0.08)">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background: var(--green)">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
+            <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY" class="w-9 h-9 rounded-xl object-contain flex-shrink-0">
             <div>
                 <p class="font-display font-bold text-sm" style="color: var(--green)">MONY</p>
                 <p class="text-xs" style="color: var(--text-muted)">KSP Cempaka</p>
@@ -45,17 +41,15 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Anggota
             </a>
+            <a href="{{ route('admin.pengurus.index') }}" class="sidebar-link {{ request()->routeIs('admin.pengurus.*') ? 'active' : '' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                Pengurus
+            </a>
 
             <p class="px-3 text-xs font-semibold uppercase tracking-wider mb-2 mt-4" style="color: var(--text-muted)">Gadai</p>
             <a href="{{ route('admin.gadai.index') }}" class="sidebar-link {{ request()->routeIs('admin.gadai.*') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 Manajemen Gadai
-            </a>
-            <a href="{{ route('admin.konfirmasi.index') }}" class="sidebar-link {{ request()->routeIs('admin.konfirmasi.*') ? 'active' : '' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Konfirmasi
-                @php $pc = \App\Models\PengajuanGadai::where('status','proses')->count() + \App\Models\PembayaranGadai::where('status','pending')->count() + \App\Models\Simpanan::where('status','pending')->count() + \App\Models\User::where('account_status','pending')->where('role','anggota')->count() @endphp
-                @if($pc > 0)<span class="ml-auto badge-danger text-xs">{{ $pc }}</span>@endif
             </a>
             <a href="{{ route('admin.katalog.index') }}" class="sidebar-link {{ request()->routeIs('admin.katalog.*') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -65,26 +59,17 @@
             <p class="px-3 text-xs font-semibold uppercase tracking-wider mb-2 mt-4" style="color: var(--text-muted)">Keuangan</p>
             <a href="{{ route('admin.simpanan.index') }}" class="sidebar-link {{ request()->routeIs('admin.simpanan.*') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                Simpanan
-            </a>
-            <a href="{{ route('admin.biaya.index') }}" class="sidebar-link {{ request()->routeIs('admin.biaya.*') ? 'active' : '' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
-                Biaya Operasional
+                Pembayaran
             </a>
             <a href="{{ route('admin.laporan.keuangan') }}" class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Laporan
             </a>
-            <a href="{{ route('admin.shu.index') }}" class="sidebar-link {{ request()->routeIs('admin.shu.*') ? 'active' : '' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/></svg>
-                SHU
+            <a href="{{ route('admin.transaction-logs.index') }}" class="sidebar-link {{ request()->routeIs('admin.transaction-logs.*') ? 'active' : '' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.414l3.586 3.586A1 1 0 0116 7.414V19a2 2 0 01-2 2z"/></svg>
+                Log ACID
             </a>
-
             <p class="px-3 text-xs font-semibold uppercase tracking-wider mb-2 mt-4" style="color: var(--text-muted)">Pengaturan</p>
-            <a href="{{ route('admin.notifikasi.kirim') }}" class="sidebar-link {{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                Kirim Notifikasi
-            </a>
             <a href="{{ route('admin.pengaturan') }}" class="sidebar-link {{ request()->routeIs('admin.pengaturan') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Pengaturan
@@ -115,28 +100,28 @@
 
     <div class="transition-all duration-200" :class="sidebarOpen ? 'lg:ml-64' : 'ml-0'">
         <header class="sticky top-0 z-20 backdrop-blur px-4 py-3 flex items-center justify-between border-b"
-                style="background: rgba(245,240,232,0.9); border-color: rgba(26,61,46,0.08)">
+                style="background: rgba(15,42,30,0.92); border-color: rgba(255,255,255,0.1)">
             <div class="flex items-center gap-3">
                 <button @click="sidebarOpen = !sidebarOpen"
-                        class="p-2 rounded-xl transition-colors" style="color: var(--text-muted)"
-                        onmouseover="this.style.background='var(--green-light)'; this.style.color='var(--green)'"
-                        onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+                        class="p-2 rounded-xl transition-colors" style="color: rgba(255,255,255,0.7)"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'"
+                        onmouseout="this.style.background='transparent'; this.style.color='rgba(255,255,255,0.7)'">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
                 @isset($breadcrumbs)
                     <nav class="hidden sm:flex items-center gap-1 text-sm">
                         @foreach($breadcrumbs as $crumb)
                             @if(!$loop->last)
-                                <a href="{{ $crumb['url'] ?? '#' }}" class="transition-colors" style="color: var(--text-muted)" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text-muted)'">{{ $crumb['label'] }}</a>
-                                <svg class="w-3 h-3" style="color: var(--text-muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                <a href="{{ $crumb['url'] ?? '#' }}" class="transition-colors" style="color: rgba(255,255,255,0.55)" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">{{ $crumb['label'] }}</a>
+                                <svg class="w-3 h-3" style="color: rgba(255,255,255,0.4)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             @else
-                                <span class="font-medium" style="color: var(--text)">{{ $crumb['label'] }}</span>
+                                <span class="font-medium" style="color: white">{{ $crumb['label'] }}</span>
                             @endif
                         @endforeach
                     </nav>
                 @endisset
             </div>
-            <span class="hidden sm:block text-sm font-medium" style="color: var(--text)">{{ auth()->user()->name }}</span>
+            <span class="hidden sm:block text-sm font-medium" style="color: white">{{ auth()->user()->name }}</span>
         </header>
 
         @if(session('success'))
@@ -161,5 +146,8 @@
         </main>
     </div>
 
+    @include('partials.confirm-modal')
+    @include('partials.reject-modal')
+    @include('partials.lightbox')
 </body>
 </html>

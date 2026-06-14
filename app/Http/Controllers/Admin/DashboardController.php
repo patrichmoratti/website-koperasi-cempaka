@@ -16,11 +16,11 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_anggota_aktif'  => User::where('role','anggota')->where('account_status','active')->count(),
-            'total_gadai_aktif'    => TransaksiGadai::where('status','aktif')->count(),
-            'total_pinjaman'       => TransaksiGadai::where('status','aktif')->sum('loan_amount'),
+            'total_gadai_aktif'    => TransaksiGadai::whereIn('status',['aktif','menunggu_lelang'])->count(),
+            'total_pinjaman'       => TransaksiGadai::whereIn('status',['aktif','menunggu_lelang'])->sum('loan_amount'),
             'total_simpanan'       => Simpanan::where('status','confirmed')->sum('amount'),
             'pendapatan_bulan_ini' => PembayaranGadai::where('status','confirmed')->whereMonth('confirmed_at', now()->month)->whereYear('confirmed_at', now()->year)->sum('amount'),
-            'pending_hari_ini'     => PengajuanGadai::where('status','proses')->whereDate('submitted_at', today())->count(),
+            'gadai_overdue'        => TransaksiGadai::whereIn('status',['aktif','menunggu_lelang'])->where('due_date','<',now())->count(),
         ];
 
         // Trend pendapatan 12 bulan
@@ -58,8 +58,6 @@ class DashboardController extends Controller
                 ->whereYear('confirmed_at', $month->year)->whereMonth('confirmed_at', $month->month)->sum('amount');
         }
 
-        $recentActivity = PengajuanGadai::with('anggota','jenisBarang')->latest()->take(8)->get();
-
-        return view('admin.dashboard', compact('stats','labels','incomeByMonth','gadaiByMonth','jenisDistrib','simpananPokok','simpananWajib','recentActivity'));
+        return view('admin.dashboard', compact('stats','labels','incomeByMonth','gadaiByMonth','jenisDistrib','simpananPokok','simpananWajib'));
     }
 }
