@@ -25,17 +25,21 @@ Route::middleware(['auth', 'account.status', 'role:admin'])->prefix('admin')->na
     Route::post('/anggota/{user}/activate', [\App\Http\Controllers\Admin\AnggotaController::class, 'activate'])->name('anggota.activate');
     Route::post('/anggota/{user}/reject', [\App\Http\Controllers\Admin\AnggotaController::class, 'reject'])->name('anggota.reject');
     Route::post('/anggota/{user}/suspend', [\App\Http\Controllers\Admin\AnggotaController::class, 'suspend'])->name('anggota.suspend');
+    Route::post('/anggota/{user}/reactivate', [\App\Http\Controllers\Admin\AnggotaController::class, 'reactivate'])->name('anggota.reactivate');
     Route::post('/anggota/{user}/reset-password', [\App\Http\Controllers\Admin\AnggotaController::class, 'resetPassword'])->name('anggota.reset-password');
+    Route::post('/anggota', [\App\Http\Controllers\Admin\AnggotaController::class, 'store'])->name('anggota.store');
 
     // Gadai
     Route::get('/gadai', [\App\Http\Controllers\Admin\GadaiController::class, 'index'])->name('gadai.index');
     Route::get('/gadai/pengajuan/{pengajuan}', [\App\Http\Controllers\Admin\GadaiController::class, 'showPengajuan'])->name('gadai.pengajuan');
     Route::post('/gadai/pengajuan/{pengajuan}/approve', [\App\Http\Controllers\Admin\GadaiController::class, 'approvePengajuan'])->name('gadai.pengajuan.approve');
     Route::post('/gadai/pengajuan/{pengajuan}/reject', [\App\Http\Controllers\Admin\GadaiController::class, 'rejectPengajuan'])->name('gadai.pengajuan.reject');
+    Route::post('/gadai/pengajuan/{pengajuan}/nilai', [\App\Http\Controllers\Admin\GadaiController::class, 'nilaiBarang'])->name('gadai.pengajuan.nilai');
     Route::get('/gadai/transaksi/{transaksi}', [\App\Http\Controllers\Admin\GadaiController::class, 'showTransaksi'])->name('gadai.transaksi');
     Route::post('/gadai/transaksi/{transaksi}/lelang', [\App\Http\Controllers\Admin\GadaiController::class, 'markMenungguLelang'])->name('gadai.transaksi.lelang');
     Route::post('/gadai/transaksi/{transaksi}/proses-lelang', [\App\Http\Controllers\Admin\GadaiController::class, 'prosesLelang'])->name('gadai.transaksi.proses-lelang');
     Route::get('/gadai/transaksi/{transaksi}/pdf', [\App\Http\Controllers\Admin\GadaiController::class, 'exportPdf'])->name('gadai.transaksi.pdf');
+    Route::post('/gadai/manual', [\App\Http\Controllers\Admin\GadaiController::class, 'storeManual'])->name('gadai.store-manual');
 
     // Konfirmasi
     Route::get('/konfirmasi', [\App\Http\Controllers\Admin\KonfirmasiController::class, 'index'])->name('konfirmasi.index');
@@ -64,15 +68,8 @@ Route::middleware(['auth', 'account.status', 'role:admin'])->prefix('admin')->na
     Route::get('/laporan/keuangan/pdf', [\App\Http\Controllers\Admin\LaporanController::class, 'exportKeuanganPdf'])->name('laporan.keuangan.pdf');
     Route::get('/laporan/gadai/excel', [\App\Http\Controllers\Admin\LaporanController::class, 'exportGadaiExcel'])->name('laporan.gadai.excel');
 
-    // SHU
-    Route::get('/shu', [\App\Http\Controllers\Admin\ShuController::class, 'index'])->name('shu.index');
-    Route::get('/shu/create', [\App\Http\Controllers\Admin\ShuController::class, 'create'])->name('shu.create');
-    Route::post('/shu', [\App\Http\Controllers\Admin\ShuController::class, 'store'])->name('shu.store');
-    Route::get('/shu/{shu}', [\App\Http\Controllers\Admin\ShuController::class, 'show'])->name('shu.show');
-    Route::post('/shu/{shu}/calculate', [\App\Http\Controllers\Admin\ShuController::class, 'calculate'])->name('shu.calculate');
-    Route::post('/shu/{shu}/publish', [\App\Http\Controllers\Admin\ShuController::class, 'publish'])->name('shu.publish');
-    Route::get('/shu/{shu}/excel', [\App\Http\Controllers\Admin\ShuController::class, 'exportExcel'])->name('shu.excel');
-    Route::get('/shu/{shu}/pdf', [\App\Http\Controllers\Admin\ShuController::class, 'exportPdf'])->name('shu.pdf');
+    // Transaction Logs (ACID)
+    Route::get('/transaction-logs', [\App\Http\Controllers\Admin\TransactionLogController::class, 'index'])->name('transaction-logs.index');
 
     // Biaya
     Route::get('/biaya', [\App\Http\Controllers\Admin\BiayaController::class, 'index'])->name('biaya.index');
@@ -85,6 +82,12 @@ Route::middleware(['auth', 'account.status', 'role:admin'])->prefix('admin')->na
     // Notifikasi
     Route::get('/notifikasi/kirim', [\App\Http\Controllers\Admin\NotifikasiController::class, 'kirim'])->name('notifikasi.kirim');
     Route::post('/notifikasi/send', [\App\Http\Controllers\Admin\NotifikasiController::class, 'send'])->name('notifikasi.send');
+
+    // Pengurus
+    Route::get('/pengurus', [\App\Http\Controllers\Admin\PengurusController::class, 'index'])->name('pengurus.index');
+    Route::post('/pengurus', [\App\Http\Controllers\Admin\PengurusController::class, 'store'])->name('pengurus.store');
+    Route::patch('/pengurus/{user}/toggle-status', [\App\Http\Controllers\Admin\PengurusController::class, 'toggleStatus'])->name('pengurus.toggle-status');
+    Route::post('/pengurus/{user}/reset-password', [\App\Http\Controllers\Admin\PengurusController::class, 'resetPassword'])->name('pengurus.reset-password');
 
     // Pengaturan
     Route::get('/pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'index'])->name('pengaturan');
@@ -110,11 +113,14 @@ Route::middleware(['auth', 'account.status', 'role:admin,pengurus'])->prefix('pe
 
     // Gadai
     Route::get('/gadai', [\App\Http\Controllers\Pengurus\GadaiController::class, 'index'])->name('gadai.index');
+    Route::post('/gadai/manual', [\App\Http\Controllers\Pengurus\GadaiController::class, 'storeManual'])->name('gadai.store-manual');
+    Route::post('/gadai/pengajuan/{pengajuan}/nilai', [\App\Http\Controllers\Pengurus\GadaiController::class, 'nilaiBarang'])->name('gadai.pengajuan.nilai');
     Route::get('/gadai/pengajuan/{pengajuan}', [\App\Http\Controllers\Pengurus\GadaiController::class, 'showPengajuan'])->name('gadai.pengajuan');
     Route::get('/gadai/transaksi/{transaksi}', [\App\Http\Controllers\Pengurus\GadaiController::class, 'showTransaksi'])->name('gadai.transaksi');
 
-    // Anggota (view-only)
+    // Anggota
     Route::get('/anggota', [\App\Http\Controllers\Pengurus\AnggotaController::class, 'index'])->name('anggota.index');
+    Route::post('/anggota', [\App\Http\Controllers\Pengurus\AnggotaController::class, 'store'])->name('anggota.store');
     Route::get('/anggota/{user}', [\App\Http\Controllers\Pengurus\AnggotaController::class, 'show'])->name('anggota.show');
 
     // Biaya
@@ -125,6 +131,9 @@ Route::middleware(['auth', 'account.status', 'role:admin,pengurus'])->prefix('pe
     Route::get('/pesan', [\App\Http\Controllers\Pengurus\PesanController::class, 'index'])->name('pesan.index');
     Route::get('/pesan/{user}', [\App\Http\Controllers\Pengurus\PesanController::class, 'show'])->name('pesan.show');
     Route::post('/pesan/{user}/reply', [\App\Http\Controllers\Pengurus\PesanController::class, 'reply'])->name('pesan.reply');
+
+    // Riwayat
+    Route::get('/riwayat', [\App\Http\Controllers\Pengurus\RiwayatController::class, 'index'])->name('riwayat.index');
 });
 
 // ═══════════════════════════════════════
@@ -141,14 +150,12 @@ Route::middleware(['auth', 'account.status', 'role:anggota'])->prefix('anggota')
     Route::get('/gadai/{transaksi}/detail', [\App\Http\Controllers\Anggota\GadaiController::class, 'detail'])->name('gadai.detail');
     Route::get('/gadai/{transaksi}/bayar', [\App\Http\Controllers\Anggota\GadaiController::class, 'bayarForm'])->name('gadai.bayar');
     Route::post('/gadai/{transaksi}/bayar', [\App\Http\Controllers\Anggota\GadaiController::class, 'bayarStore'])->name('gadai.bayar.store');
+    Route::delete('/gadai/pengajuan/{pengajuan}/cancel', [\App\Http\Controllers\Anggota\GadaiController::class, 'cancelPengajuan'])->name('gadai.pengajuan.cancel');
 
     // Simpanan
     Route::get('/simpanan', [\App\Http\Controllers\Anggota\SimpananController::class, 'index'])->name('simpanan.index');
     Route::get('/simpanan/bayar', [\App\Http\Controllers\Anggota\SimpananController::class, 'bayarForm'])->name('simpanan.bayar');
     Route::post('/simpanan/bayar', [\App\Http\Controllers\Anggota\SimpananController::class, 'bayarStore'])->name('simpanan.bayar.store');
-
-    // SHU
-    Route::get('/shu', [\App\Http\Controllers\Anggota\ShuController::class, 'index'])->name('shu.index');
 
     // Riwayat
     Route::get('/riwayat', [\App\Http\Controllers\Anggota\RiwayatController::class, 'index'])->name('riwayat');
