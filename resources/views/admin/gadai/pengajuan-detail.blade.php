@@ -54,9 +54,11 @@ $title = 'Detail Pengajuan';
             <h3 class="section-title mb-3">Foto Barang</h3>
             <div class="grid grid-cols-3 gap-3">
                 @foreach($pengajuan->item_photo_paths as $photo)
-                    <img src="{{ asset('storage/' . $photo) }}" alt="Foto barang"
-                         class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90"
-                         onclick="window.open('{{ asset('storage/' . $photo) }}')">
+                    <div @click="$store.lb = { show: true, src: '{{ asset('storage/' . $photo) }}', type: 'image' }"
+                         class="rounded-lg overflow-hidden border border-gray-200 cursor-pointer group" style="aspect-ratio:1;">
+                        <img src="{{ asset('storage/' . $photo) }}" alt="Foto barang"
+                             class="w-full h-full object-cover group-hover:opacity-85 transition-opacity">
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -64,57 +66,80 @@ $title = 'Detail Pengajuan';
 
         {{-- Action --}}
         @if($pengajuan->status === 'proses')
-        <div class="card p-5" x-data="{ showReject: false }">
-            <h3 class="section-title mb-4">Proses Pengajuan</h3>
+        <div class="card p-5">
+            <h3 class="section-title mb-3">Proses Pengajuan</h3>
+            <p class="text-sm text-mony-muted mb-4">Terima pengajuan untuk memberi tahu anggota agar membawa barang ke koperasi. Penilaian dilakukan setelah barang hadir secara fisik.</p>
+            <div class="flex gap-3">
+                <form method="POST" action="{{ route('admin.gadai.pengajuan.approve', $pengajuan) }}">
+                    @csrf
+                    <button type="submit" class="btn-success"
+                            onclick="return confirmAction(event, 'Terima pengajuan ini? Anggota akan dihubungi untuk membawa barang ke koperasi.', 'Ya, Terima')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        Terima Pengajuan
+                    </button>
+                </form>
+                <button type="button" class="btn-danger"
+                        onclick="openRejectModal('Alasan penolakan pengajuan gadai {{ addslashes($pengajuan->jenisBarang?->name) }} dari {{ addslashes($pengajuan->anggota?->name) }}', '{{ route('admin.gadai.pengajuan.reject', $pengajuan) }}')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Tolak Pengajuan
+                </button>
+            </div>
+        </div>
 
-            <form method="POST" action="{{ route('admin.gadai.pengajuan.approve', $pengajuan) }}" class="space-y-4">
+        @elseif($pengajuan->status === 'diterima' && !$pengajuan->transaksi)
+        @php
+            $maxLoanCalc = $pengajuan->jenisBarang?->maxLoanAmount($pengajuan->estimated_value) ?? $pengajuan->estimated_value;
+            $maxPctCalc  = $pengajuan->jenisBarang?->max_loan_percentage ?? 100;
+        @endphp
+        <div class="card p-5" id="nilai">
+            <h3 class="section-title mb-1">Penilaian Barang</h3>
+            <p class="text-sm text-mony-muted mb-4">Anggota telah membawa barang ke koperasi. Konfirmasi pinjaman yang disetujui untuk membuat transaksi gadai aktif.</p>
+            <form method="POST" action="{{ route('admin.gadai.pengajuan.nilai', $pengajuan) }}" class="space-y-4"
+                  x-data="{
+                    loanRaw: {{ $pengajuan->loan_request_amount }},
+                    fmt(n) { return n ? new Intl.NumberFormat('id-ID').format(n) : ''; },
+                    handleLoan(e) { let d=e.target.value.replace(/\D/g,''); this.loanRaw=d?parseInt(d):0; e.target.value=this.fmt(this.loanRaw); }
+                  }">
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="form-label">Nilai Taksir (Rp) <span class="text-red-500">*</span></label>
-                        <input type="number" name="appraisal_value"
-                               value="{{ old('appraisal_value', $pengajuan->estimated_value) }}"
-                               class="form-input @error('appraisal_value') border-red-400 @enderror"
-                               min="1" required>
-                        @error('appraisal_value') <p class="form-error">{{ $message }}</p> @enderror
+                        <label class="form-label">Nilai Taksiran</label>
+                        <div class="flex items-center rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                            <span class="px-3 py-2.5 text-sm font-semibold border-r border-gray-200" style="color:var(--green);">Rp</span>
+                            <span class="flex-1 px-3 py-2.5 text-sm font-semibold text-gray-500">
+                                {{ number_format($pengajuan->estimated_value, 0, ',', '.') }}
+                            </span>
+                            <svg class="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <p class="text-xs text-mony-muted mt-1">Otomatis dari nilai merk barang</p>
                     </div>
                     <div>
-                        <label class="form-label">Jumlah Pinjaman Disetujui (Rp) <span class="text-red-500">*</span></label>
-                        <input type="number" name="loan_amount"
-                               value="{{ old('loan_amount', $pengajuan->loan_request_amount) }}"
-                               class="form-input @error('loan_amount') border-red-400 @enderror"
-                               min="1" required>
-                        @error('loan_amount') <p class="form-error">{{ $message }}</p> @enderror
+                        <label class="form-label">Pinjaman Disetujui (Rp) <span class="text-red-500">*</span></label>
+                        <div class="flex items-center rounded-lg overflow-hidden border border-gray-300">
+                            <span class="px-3 py-2.5 text-sm font-semibold border-r border-gray-300 bg-gray-50" style="color:var(--green);">Rp</span>
+                            <input type="text" x-init="$el.value = fmt(loanRaw)" x-on:input="handleLoan($event)"
+                                   class="flex-1 px-3 py-2.5 text-sm outline-none border-0 bg-white font-semibold"
+                                   style="color:var(--green2);" required>
+                        </div>
+                        <input type="hidden" name="loan_amount" :value="loanRaw">
+                        <p class="text-xs text-mony-muted mt-1">Maksimal: Rp {{ number_format($maxLoanCalc, 0, ',', '.') }} ({{ $maxPctCalc }}% dari taksiran)</p>
                     </div>
                     <div class="col-span-2">
                         <label class="form-label">Lokasi Penyimpanan</label>
                         <input type="text" name="warehouse_location" class="form-input" placeholder="Contoh: Rak A-01">
                     </div>
                 </div>
-                <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                    <strong>Info:</strong> Dengan menyetujui, sistem akan membuat transaksi gadai otomatis. Bunga 8%/bulan, jatuh tempo 4 bulan.
+                <div class="p-3 rounded-lg text-sm flex items-start gap-2" style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534;">
+                    <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Transaksi gadai aktif akan dibuat. Bunga <strong>8%/bulan</strong>. Jatuh tempo awal <strong>4 bulan</strong> — otomatis diperpanjang 4 bulan setiap kali anggota membayar bunga. Barang dilelang jika tidak membayar bunga <strong>4 bulan berturut-turut</strong>.</span>
                 </div>
-                <button type="submit" class="btn-success" onclick="return confirm('Setujui pengajuan ini?')">
+                <button type="submit" class="btn-success" onclick="return confirmAction(event, 'Konfirmasi penilaian dan buat transaksi gadai?', 'Ya, Buat Transaksi')">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Setujui Pengajuan
+                    Konfirmasi & Buat Transaksi
                 </button>
             </form>
-
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                <button @click="showReject = !showReject" class="btn-danger">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    Tolak Pengajuan
-                </button>
-                <div x-show="showReject" class="mt-4">
-                    <form method="POST" action="{{ route('admin.gadai.pengajuan.reject', $pengajuan) }}">
-                        @csrf
-                        <label class="form-label">Alasan Penolakan</label>
-                        <textarea name="reason" class="form-input mb-3" rows="3" placeholder="Jelaskan alasan penolakan..." required></textarea>
-                        <button type="submit" class="btn-danger btn-sm">Konfirmasi Tolak</button>
-                    </form>
-                </div>
-            </div>
         </div>
+
         @else
         <div class="card p-5">
             <div class="flex items-center gap-3">

@@ -106,6 +106,33 @@ class TransaksiGadai extends Model
         };
     }
 
+    public function paymentSchedule(): array
+    {
+        $confirmedMonths = $this->pembayaran
+            ->where('payment_type', 'bunga')
+            ->where('status', 'confirmed')
+            ->flatMap(fn($p) => $p->paid_months ?? [])
+            ->unique()->values()->toArray();
+
+        $schedule = [];
+        $cursor   = $this->pawn_date->copy()->addMonth()->startOfMonth();
+        $end      = $this->due_date->copy()->startOfMonth();
+        $i = 1;
+        while ($cursor->lte($end)) {
+            $key        = $cursor->format('Y-m');
+            $schedule[] = [
+                'no'    => $i,
+                'label' => 'Bulan ke-' . $i,
+                'date'  => $cursor->format('d M Y'),
+                'amount'=> $this->monthlyInterest(),
+                'lunas' => in_array($key, $confirmedMonths),
+            ];
+            $cursor->addMonth();
+            $i++;
+        }
+        return $schedule;
+    }
+
     public static function generateReference(): string
     {
         return 'TRX-' . strtoupper(now()->format('Ymd')) . '-' . strtoupper(substr(uniqid(), -6));

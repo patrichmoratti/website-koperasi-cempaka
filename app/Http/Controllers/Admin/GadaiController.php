@@ -3,44 +3,133 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\JenisBarangGadai;
 use App\Models\PengajuanGadai;
+use App\Models\RiwayatStatus;
 use App\Models\TransaksiGadai;
+use App\Models\User;
 use App\Services\GadaiService;
 use App\Services\ReportService;
+use App\Services\TransactionLogService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GadaiController extends Controller
 {
-    public function __construct(private GadaiService $gadaiService, private ReportService $reportService) {}
+    public function __construct(
+        private GadaiService $gadaiService,
+        private ReportService $reportService,
+        private TransactionLogService $transactionLog,
+    ) {}
 
     public function index(Request $request)
     {
-        $tab    = $request->get('tab', 'pengajuan');
+        $tab    = $request->get('tab', 'aktif');
         $search = $request->get('search');
 
-        $pengajuan = PengajuanGadai::with(['anggota','jenisBarang'])
-            ->when($tab === 'pengajuan', fn($q) => $q->where('status','proses'))
-            ->when($tab === 'diterima', fn($q) => $q->where('status','diterima'))
-            ->when($tab === 'ditolak', fn($q) => $q->where('status','ditolak'))
+        $transaksi = TransaksiGadai::with(['anggota','jenisBarang','pengajuan','pembayaran'])
+            ->when($tab === 'aktif',   fn($q) => $q->whereIn('status', ['aktif', 'menunggu_lelang']))
+            ->when($tab === 'selesai', fn($q) => $q->whereIn('status', ['selesai','ditebus','dilelang']))
             ->when($search, fn($q) => $q->whereHas('anggota', fn($sq) => $sq->where('name','like',"%{$search}%")))
             ->latest()->paginate(15)->withQueryString();
 
-        $transaksi = TransaksiGadai::with(['anggota','jenisBarang'])
-            ->when($tab === 'aktif', fn($q) => $q->where('status','aktif'))
-            ->when($tab === 'selesai', fn($q) => $q->whereIn('status',['selesai','ditebus','dilelang']))
-            ->when($tab === 'semua', fn($q) => $q)
-            ->when($search && in_array($tab,['aktif','selesai','semua']), fn($q) => $q->whereHas('anggota', fn($sq) => $sq->where('name','like',"%{$search}%")))
-            ->latest()->paginate(15)->withQueryString();
-
         $counts = [
-            'pengajuan' => PengajuanGadai::where('status','proses')->count(),
-            'aktif'     => TransaksiGadai::where('status','aktif')->count(),
-            'selesai'   => TransaksiGadai::whereIn('status',['selesai','ditebus','dilelang'])->count(),
-            'diterima'  => PengajuanGadai::where('status','diterima')->count(),
-            'ditolak'   => PengajuanGadai::where('status','ditolak')->count(),
+            'aktif'   => TransaksiGadai::whereIn('status', ['aktif', 'menunggu_lelang'])->count(),
+            'selesai' => TransaksiGadai::whereIn('status', ['selesai','ditebus','dilelang'])->count(),
         ];
 
-        return view('admin.gadai.index', compact('tab','pengajuan','transaksi','counts','search'));
+        $anggotaList     = User::where('role','anggota')->where('account_status','active')->orderBy('name')->get(['id','name','email']);
+        $jenisBarangList = JenisBarangGadai::active()->orderBy('name')->get(['id','name','category']);
+
+        return view('admin.gadai.index', compact('tab','transaksi','counts','search','anggotaList','jenisBarangList'));
+    }
+
+    public function storeManual(Request $request)
+    {
+        $request->validate([
+            'anggota_id'         => 'required|exists:users,id',
+            'jenis_barang_id'    => 'required|exists:jenis_barang_gadai,id',
+            'brand_name'         => 'required|string|max:100',
+            'condition'          => 'required|string',
+            'description'        => 'nullable|string|max:1000',
+            'weight_or_quantity' => 'nullable|string|max:50',
+            'appraisal_value'    => 'required|numeric|min:1',
+            'loan_amount'        => 'required|numeric|min:1',
+            'warehouse_location' => 'nullable|string|max:100',
+            'pawn_date'          => 'required|date',
+            'photos.*'           => 'nullable|image|max:5120',
+        ]);
+
+        $photoPaths = [];
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $photoPaths[] = $photo->store('gadai/photos', 'public');
+            }
+        }
+
+        $logData = [
+            'transaction_type' => 'pengajuan_gadai',
+            'reference_id'     => $request->anggota_id,
+            'reference_type'   => 'transaksi_gadai',
+            'anggota_id'       => $request->anggota_id,
+            'amount'           => $request->loan_amount,
+            'description'      => "Transaksi gadai manual dibuat oleh admin",
+        ];
+
+        try {
+            $ref = DB::transaction(function () use ($request, $photoPaths, $logData) {
+                $pawnDate = Carbon::parse($request->pawn_date);
+                $dueDate  = $pawnDate->copy()->addMonths(4);
+
+                $pengajuan = PengajuanGadai::create([
+                    'anggota_id'          => $request->anggota_id,
+                    'jenis_barang_id'     => $request->jenis_barang_id,
+                    'brand_name'          => $request->brand_name,
+                    'description'         => $request->description,
+                    'weight_or_quantity'  => $request->weight_or_quantity,
+                    'condition'           => $request->condition,
+                    'estimated_value'     => $request->appraisal_value,
+                    'loan_request_amount' => $request->loan_amount,
+                    'item_photo_paths'    => $photoPaths ?: null,
+                    'status'              => 'diterima',
+                    'processed_by'        => auth()->id(),
+                    'processed_at'        => now(),
+                    'submitted_at'        => now(),
+                ]);
+
+                $transaksi = TransaksiGadai::create([
+                    'anggota_id'         => $request->anggota_id,
+                    'pengajuan_id'       => $pengajuan->id,
+                    'jenis_barang_id'    => $request->jenis_barang_id,
+                    'item_description'   => $request->description,
+                    'item_photo_paths'   => $photoPaths ?: null,
+                    'appraisal_value'    => $request->appraisal_value,
+                    'loan_amount'        => $request->loan_amount,
+                    'interest_rate'      => 8.00,
+                    'pawn_date'          => $pawnDate,
+                    'due_date'           => $dueDate,
+                    'status'             => 'aktif',
+                    'warehouse_location' => $request->warehouse_location,
+                    'reference_number'   => TransaksiGadai::generateReference(),
+                ]);
+
+                RiwayatStatus::record('transaksi_gadai', $transaksi->id, null, 'aktif');
+
+                $this->transactionLog->log(array_merge($logData, [
+                    'reference_id' => $transaksi->id,
+                    'description'  => "Transaksi gadai manual {$transaksi->reference_number} dibuat oleh admin",
+                ]));
+
+                return $transaksi->reference_number;
+            });
+        } catch (\Throwable $e) {
+            $this->transactionLog->logFailure($logData, $e);
+            throw $e;
+        }
+
+        return redirect()->route('admin.gadai.index', ['tab' => 'aktif'])
+            ->with('success', "Transaksi gadai manual {$ref} berhasil dibuat.");
     }
 
     public function showPengajuan(PengajuanGadai $pengajuan)
@@ -49,18 +138,28 @@ class GadaiController extends Controller
         return view('admin.gadai.pengajuan-detail', compact('pengajuan'));
     }
 
-    public function approvePengajuan(Request $request, PengajuanGadai $pengajuan)
+    public function approvePengajuan(PengajuanGadai $pengajuan)
     {
+        $this->gadaiService->terimaPengajuan($pengajuan);
+        return redirect()->route('admin.gadai.index', ['tab' => 'diterima'])
+            ->with('success', 'Pengajuan diterima. Anggota akan membawa barang ke koperasi untuk penilaian.');
+    }
+
+    public function nilaiBarang(Request $request, PengajuanGadai $pengajuan)
+    {
+        $maxLoan = $pengajuan->jenisBarang->maxLoanAmount($pengajuan->estimated_value);
+
         $request->validate([
-            'appraisal_value'    => 'required|numeric|min:1',
-            'loan_amount'        => 'required|numeric|min:1',
+            'loan_amount'        => "required|numeric|min:1|max:{$maxLoan}",
             'warehouse_location' => 'nullable|string|max:255',
+        ], [
+            'loan_amount.max' => 'Pinjaman disetujui maksimal Rp ' . number_format($maxLoan, 0, ',', '.') . ' (' . $pengajuan->jenisBarang->max_loan_percentage . '% dari nilai taksiran).',
         ]);
 
-        $transaksi = $this->gadaiService->approvePengajuan($pengajuan, $request->only('appraisal_value','loan_amount','warehouse_location'));
+        $transaksi = $this->gadaiService->nilaiPengajuan($pengajuan, $request->only('loan_amount','warehouse_location'));
 
         return redirect()->route('admin.gadai.transaksi', $transaksi->id)
-            ->with('success', "Pengajuan disetujui. Transaksi {$transaksi->reference_number} dibuat.");
+            ->with('success', "Transaksi gadai {$transaksi->reference_number} berhasil dibuat.");
     }
 
     public function rejectPengajuan(Request $request, PengajuanGadai $pengajuan)

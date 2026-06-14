@@ -21,7 +21,7 @@ $title = 'Detail Transaksi ' . $transaksi->reference_number;
         </a>
         @if($transaksi->status === 'aktif' && $transaksi->isOverdue())
             <form method="POST" action="{{ route('admin.gadai.transaksi.lelang', $transaksi) }}"
-                  onsubmit="return confirm('Tandai sebagai menunggu lelang?')">
+                  onsubmit="return confirmAction(event, 'Tandai sebagai menunggu lelang?', 'Ya, Tandai')">
                 @csrf
                 <button class="btn-danger btn-sm">Tandai Lelang</button>
             </form>
@@ -104,8 +104,8 @@ $title = 'Detail Transaksi ' . $transaksi->reference_number;
                             <span class="badge-{{ $bayar->status_color }} text-xs">{{ ucfirst($bayar->status) }}</span>
                         </div>
                         @if($bayar->transfer_proof_path)
-                            <a href="{{ asset('storage/' . $bayar->transfer_proof_path) }}" target="_blank"
-                               class="ml-3 text-primary text-xs hover:underline">Lihat Bukti</a>
+                            <button type="button" @click.stop="$store.lb = { show: true, src: '{{ asset('storage/' . $bayar->transfer_proof_path) }}', type: 'image' }"
+                                    class="ml-3 text-primary text-xs hover:underline">Lihat Bukti</button>
                         @endif
                     </div>
                     @endforeach
@@ -135,7 +135,7 @@ $title = 'Detail Transaksi ' . $transaksi->reference_number;
                         <textarea name="notes" class="form-input" rows="2"></textarea>
                     </div>
                 </div>
-                <button type="submit" class="btn-danger" onclick="return confirm('Proses lelang barang ini?')">Proses Lelang</button>
+                <button type="submit" class="btn-danger" onclick="return confirmAction(event, 'Proses lelang barang ini?', 'Ya, Proses')">Proses Lelang</button>
             </form>
         </div>
         @endif

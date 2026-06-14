@@ -9,9 +9,6 @@ use App\Models\TransaksiGadai;
 use App\Models\PembayaranGadai;
 use App\Models\Simpanan;
 use App\Models\BiayaOperasional;
-use App\Models\ShuPeriod;
-use App\Models\ShuDistribution;
-use App\Services\ShuCalculatorService;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 
@@ -148,11 +145,11 @@ class TransaksiSeeder extends Seeder
 
         // ── SIMPANAN ───────────────────────────────────
         foreach ([$sari, $dedi, $rina] as $user) {
-            // Simpanan pokok
+            // Simpanan wajib — dibayar sekali di awal untuk menjadi anggota resmi
             Simpanan::create([
                 'anggota_id'    => $user->id,
-                'type'          => 'pokok',
-                'amount'        => 500000,
+                'type'          => 'wajib',
+                'amount'        => 10000,
                 'period_month'  => null,
                 'period_year'   => null,
                 'status'        => 'confirmed',
@@ -161,12 +158,12 @@ class TransaksiSeeder extends Seeder
                 'confirmed_at'  => now()->subMonths(6),
             ]);
 
-            // Simpanan wajib beberapa bulan
+            // Simpanan pokok — disetor rutin tiap bulan (minimal Rp 50.000)
             for ($i = 5; $i >= 1; $i--) {
                 Simpanan::create([
                     'anggota_id'    => $user->id,
-                    'type'          => 'wajib',
-                    'amount'        => 100000,
+                    'type'          => 'pokok',
+                    'amount'        => 50000,
                     'period_month'  => now()->subMonths($i)->month,
                     'period_year'   => now()->subMonths($i)->year,
                     'status'        => 'confirmed',
@@ -190,48 +187,6 @@ class TransaksiSeeder extends Seeder
 
         foreach ($biaya as $b) {
             BiayaOperasional::create(array_merge($b, ['recorded_by' => $admin->id]));
-        }
-
-        // ── SHU PERIOD ────────────────────────────────
-        $shuPeriod = ShuPeriod::create([
-            'year'                => now()->year - 1,
-            'status'              => 'published',
-            'total_income'        => 8400000,
-            'total_expenses'      => 3200000,
-            'total_shu'           => 5200000,
-            'pct_dana_cadangan'   => 25,
-            'pct_jasa_modal'      => 25,
-            'pct_jasa_usaha'      => 30,
-            'pct_dana_pengurus'   => 10,
-            'pct_dana_pendidikan' => 5,
-            'pct_dana_sosial'     => 5,
-            'alloc_dana_cadangan' => 1300000,
-            'alloc_jasa_modal'    => 1300000,
-            'alloc_jasa_usaha'    => 1560000,
-            'alloc_dana_pengurus' => 520000,
-            'alloc_dana_pendidikan' => 260000,
-            'alloc_dana_sosial'   => 260000,
-        ]);
-
-        $totalSavings = 500000 * 3 + 100000 * 5 * 3;
-        $totalInterest = 400000;
-
-        foreach ([$sari, $dedi, $rina] as $user) {
-            $savings  = 500000 + 100000 * 5;
-            $interest = $user->id === $sari->id ? 400000 : 0;
-
-            ShuDistribution::create([
-                'shu_period_id'              => $shuPeriod->id,
-                'anggota_id'                 => $user->id,
-                'total_savings'              => $savings,
-                'member_savings_proportion'  => $savings / $totalSavings,
-                'member_jasa_modal'          => 1300000 * ($savings / $totalSavings),
-                'total_interest_paid'        => $interest,
-                'member_interest_proportion' => $totalInterest > 0 ? $interest / $totalInterest : 0,
-                'member_jasa_usaha'          => $totalInterest > 0 ? 1560000 * ($interest / $totalInterest) : 0,
-                'total_shu_received'         => (1300000 * ($savings / $totalSavings)) + ($totalInterest > 0 ? 1560000 * ($interest / $totalInterest) : 0),
-                'withdrawal_status'          => 'pending',
-            ]);
         }
     }
 }

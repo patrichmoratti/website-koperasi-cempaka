@@ -3,18 +3,37 @@
 $title = 'Manajemen Gadai';
 @endphp
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <h1 class="page-title">Manajemen Gadai</h1>
-</div>
 
-{{-- Tabs --}}
-<div class="flex gap-1 mb-4 bg-gray-100 p-1 rounded-xl w-fit">
-    @foreach(['pengajuan'=>'Pengajuan Baru','aktif'=>'Aktif','selesai'=>'Selesai','diterima'=>'Diterima','ditolak'=>'Ditolak','semua'=>'Semua'] as $key => $label)
+{{-- Page header --}}
+<div x-data="{ createOpen: false }">
+<div class="flex items-start justify-between mb-5">
+    <div>
+        <span class="badge-primary text-xs mb-1 inline-block">Admin</span>
+        <h1 class="text-2xl font-bold text-mony-text tracking-tight">Manajemen Gadai</h1>
+        <p class="text-sm mt-0.5 text-mony-muted">Monitoring transaksi gadai aktif dan riwayat selesai.</p>
+    </div>
+    <button type="button" @click="createOpen = true"
+            class="btn-primary btn-sm flex-shrink-0 mt-1">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Gadai Manual
+    </button>
+</div>
+@include('pengurus.gadai._popup_create_manual', ['formAction' => route('admin.gadai.store-manual')])
+</div>{{-- /createOpen x-data --}}
+
+{{-- Tab navigation --}}
+<div class="flex gap-1 p-1 rounded-2xl mb-5" style="background: rgba(255,255,255,0.1);">
+    @foreach(['aktif'=>'Transaksi Aktif','selesai'=>'Selesai'] as $key => $label)
         <a href="{{ route('admin.gadai.index', ['tab' => $key]) }}"
-           class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $tab === $key ? 'bg-white shadow text-mony-text' : 'text-mony-muted hover:text-mony-text' }}">
+           class="flex-1 text-center py-2 rounded-xl text-xs font-semibold transition-all"
+           style="{{ $tab === $key ? 'background:white; color:var(--green); box-shadow:0 1px 6px rgba(0,0,0,0.15);' : 'color:rgba(255,255,255,0.55);' }}"
+           onmouseover="{{ $tab !== $key ? "this.style.color='rgba(255,255,255,0.9)'" : '' }}"
+           onmouseout="{{ $tab !== $key ? "this.style.color='rgba(255,255,255,0.55)'" : '' }}">
             {{ $label }}
-            @if(isset($counts[$key]) && $counts[$key] > 0)
-                <span class="ml-1 badge-{{ $key === 'pengajuan' ? 'danger' : 'warning' }}">{{ $counts[$key] }}</span>
+            @if($counts[$key] > 0)
+                <span class="ml-1" style="{{ $tab === $key ? 'color:var(--green2);' : 'color:rgba(255,255,255,0.7);' }}">({{ $counts[$key] }})</span>
             @endif
         </a>
     @endforeach
@@ -28,42 +47,22 @@ $title = 'Manajemen Gadai';
             <input type="text" name="search" value="{{ $search }}" class="form-input" placeholder="Cari nama anggota...">
         </div>
         <button type="submit" class="btn-primary">Cari</button>
+        @if($search)
+            <a href="{{ route('admin.gadai.index', ['tab' => $tab]) }}" class="btn-outline">Reset</a>
+        @endif
     </form>
 </div>
 
-@if(in_array($tab, ['pengajuan','diterima','ditolak']))
-    {{-- Pengajuan table --}}
+{{-- ══ TAB: AKTIF ══ --}}
+@if($tab === 'aktif')
+<div x-data="{ openModal: null }" @keydown.escape.window="if(!$store.lb?.show){ openModal = null }">
     <div class="card overflow-hidden">
-        <table class="table-base">
-            <thead><tr>
-                <th>Anggota</th><th>Jenis Barang</th><th>Estimasi Nilai</th>
-                <th>Pinjaman Diminta</th><th>Status</th><th>Tanggal</th><th></th>
-            </tr></thead>
-            <tbody>
-                @forelse($pengajuan as $p)
-                <tr>
-                    <td class="font-medium">{{ $p->anggota?->name }}</td>
-                    <td>{{ $p->jenisBarang?->name }}</td>
-                    <td>Rp {{ number_format($p->estimated_value, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($p->loan_request_amount, 0, ',', '.') }}</td>
-                    <td><span class="badge-{{ $p->status_color }}">{{ $p->status_label }}</span></td>
-                    <td class="text-xs text-mony-muted">{{ $p->submitted_at->format('d/m/Y') }}</td>
-                    <td>
-                        <a href="{{ route('admin.gadai.pengajuan', $p) }}" class="btn-primary btn-sm">Detail</a>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="7" class="text-center py-8 text-mony-muted">Tidak ada data</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-        @if($pengajuan->hasPages())
-            <div class="px-4 py-3 border-t">{{ $pengajuan->links() }}</div>
-        @endif
-    </div>
-@else
-    {{-- Transaksi table --}}
-    <div class="card overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <p class="text-sm font-semibold text-mony-text">Transaksi Gadai Aktif</p>
+            @if($counts['aktif'] > 0)
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:var(--green-light); color:var(--green);">{{ $counts['aktif'] }} aktif</span>
+            @endif
+        </div>
         <table class="table-base">
             <thead><tr>
                 <th>No. Ref</th><th>Anggota</th><th>Barang</th>
@@ -71,20 +70,26 @@ $title = 'Manajemen Gadai';
             </tr></thead>
             <tbody>
                 @forelse($transaksi as $t)
-                <tr>
+                <tr @click="openModal = 'transaksi-{{ $t->id }}'" class="cursor-pointer">
                     <td class="font-mono text-xs">{{ $t->reference_number }}</td>
                     <td class="font-medium">{{ $t->anggota?->name }}</td>
                     <td>{{ $t->jenisBarang?->name }}</td>
-                    <td>Rp {{ number_format($t->loan_amount, 0, ',', '.') }}</td>
+                    <td class="font-medium">Rp {{ number_format($t->loan_amount, 0, ',', '.') }}</td>
                     <td class="{{ $t->isOverdue() ? 'text-red-600 font-medium' : 'text-mony-muted text-xs' }}">
                         {{ $t->due_date->format('d/m/Y') }}
-                        @if($t->isOverdue()) <span class="text-xs">(Lewat!)</span> @endif
+                        @if($t->isOverdue())<span class="text-xs"> (Lewat!)</span>@endif
                     </td>
                     <td><span class="badge-{{ $t->status_color }}">{{ $t->status_label }}</span></td>
-                    <td><a href="{{ route('admin.gadai.transaksi', $t) }}" class="btn-primary btn-sm">Detail</a></td>
+                    <td @click.stop>
+                        <div class="flex gap-1">
+                            <button type="button" @click.stop="openModal = 'transaksi-{{ $t->id }}'"
+                                    class="btn-primary btn-sm">Detail</button>
+                            <a href="{{ route('admin.gadai.transaksi', $t) }}" @click.stop class="btn-outline btn-sm">Struk</a>
+                        </div>
+                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center py-8 text-mony-muted">Tidak ada data</td></tr>
+                <tr><td colspan="7" class="text-center py-8 text-mony-muted">Tidak ada transaksi aktif</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -92,5 +97,55 @@ $title = 'Manajemen Gadai';
             <div class="px-4 py-3 border-t">{{ $transaksi->links() }}</div>
         @endif
     </div>
+
+    @foreach($transaksi as $t)
+        @include('pengurus.gadai._popup_transaksi', ['t' => $t])
+    @endforeach
+</div>
+
+{{-- ══ TAB: SELESAI ══ --}}
+@else
+<div x-data="{ openModal: null }" @keydown.escape.window="if(!$store.lb?.show){ openModal = null }">
+    <div class="card overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <p class="text-sm font-semibold text-mony-text">Transaksi Selesai</p>
+        </div>
+        <table class="table-base">
+            <thead><tr>
+                <th>No. Ref</th><th>Anggota</th><th>Barang</th>
+                <th>Pinjaman</th><th>Tanggal</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+                @forelse($transaksi as $t)
+                <tr @click="openModal = 'transaksi-{{ $t->id }}'" class="cursor-pointer">
+                    <td class="font-mono text-xs">{{ $t->reference_number }}</td>
+                    <td class="font-medium">{{ $t->anggota?->name }}</td>
+                    <td>{{ $t->jenisBarang?->name }}</td>
+                    <td>Rp {{ number_format($t->loan_amount, 0, ',', '.') }}</td>
+                    <td class="text-xs text-mony-muted">{{ $t->pawn_date->format('d/m/Y') }}</td>
+                    <td><span class="badge-{{ $t->status_color }}">{{ $t->status_label }}</span></td>
+                    <td @click.stop>
+                        <div class="flex gap-1">
+                            <button type="button" @click.stop="openModal = 'transaksi-{{ $t->id }}'"
+                                    class="btn-primary btn-sm">Detail</button>
+                            <a href="{{ route('admin.gadai.transaksi', $t) }}" @click.stop class="btn-outline btn-sm">Struk</a>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="7" class="text-center py-8 text-mony-muted">Tidak ada transaksi selesai</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+        @if($transaksi->hasPages())
+            <div class="px-4 py-3 border-t">{{ $transaksi->links() }}</div>
+        @endif
+    </div>
+
+    @foreach($transaksi as $t)
+        @include('pengurus.gadai._popup_transaksi', ['t' => $t])
+    @endforeach
+</div>
 @endif
+
 @endsection
