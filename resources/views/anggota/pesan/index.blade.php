@@ -3,9 +3,9 @@
 $title = 'Pesan';
 @endphp
 @section('content')
-<h1 class="page-title mb-6">Pesan</h1>
+<h1 class="text-2xl font-bold text-mony-text tracking-tight mb-6">Pesan</h1>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-4xl">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
     <div class="card p-5">
         <h3 class="section-title mb-4">Hubungi Pengurus</h3>
         <div class="space-y-2">

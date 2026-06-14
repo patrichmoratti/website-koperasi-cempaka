@@ -18,7 +18,7 @@ $title = 'Chat: ' . $user->name;
     </div>
 </div>
 
-<div class="card max-w-2xl">
+<div class="card">
     <div class="h-96 overflow-y-auto p-4 space-y-3" id="chatBox">
         @forelse($messages as $msg)
         <div class="flex {{ $msg->sender_id === auth()->id() ? 'justify-end' : 'justify-start' }}">
