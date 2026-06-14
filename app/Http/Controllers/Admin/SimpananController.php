@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PembayaranGadai;
 use App\Models\Simpanan;
-use App\Models\User;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SimpananController extends Controller
 {
@@ -14,35 +15,81 @@ class SimpananController extends Controller
 
     public function index(Request $request)
     {
-        $query = Simpanan::with('anggota');
+        $search = $request->search;
+        $jenis  = $request->jenis;
+        $month  = $request->month;
+        $year   = $request->year;
 
-        if ($request->search) {
-            $q = $request->search;
-            $query->whereHas('anggota', fn($sq) => $sq->where('name','like',"%{$q}%"));
+        $items = collect();
+
+        if (!$jenis || str_starts_with($jenis, 'simpanan')) {
+            $simpananQuery = Simpanan::with(['anggota', 'confirmedBy'])->confirmed();
+
+            if ($jenis === 'simpanan_pokok') $simpananQuery->pokok();
+            if ($jenis === 'simpanan_wajib') $simpananQuery->wajib();
+            if ($search) {
+                $simpananQuery->whereHas('anggota', fn($q) => $q->where('name', 'like', "%{$search}%"));
+            }
+            if ($year)  $simpananQuery->whereYear('confirmed_at', $year);
+            if ($month) $simpananQuery->whereMonth('confirmed_at', $month);
+
+            $items = $items->concat($simpananQuery->get()->map(fn($s) => [
+                'anggota'      => $s->anggota,
+                'jenis'        => $s->type_label,
+                'badge'        => $s->type === 'pokok' ? 'info' : 'primary',
+                'keterangan'   => 'Periode ' . $s->period_label,
+                'amount'       => $s->amount,
+                'confirmed_by' => $s->confirmedBy,
+                'confirmed_at' => $s->confirmed_at,
+                'detail_route' => null,
+            ]));
         }
-        if ($request->type)  $query->where('type', $request->type);
-        if ($request->month) $query->where('period_month', $request->month);
-        if ($request->year)  $query->where('period_year', $request->year);
-        if ($request->status) $query->where('status', $request->status);
 
-        $simpanan = $query->latest()->paginate(20)->withQueryString();
+        if (!$jenis || str_starts_with($jenis, 'gadai')) {
+            $pembayaranQuery = PembayaranGadai::with(['transaksi.anggota', 'transaksi.jenisBarang', 'confirmedBy'])->confirmed();
+
+            if ($jenis === 'gadai_bunga') $pembayaranQuery->where('payment_type', 'bunga');
+            if ($jenis === 'gadai_tebus') $pembayaranQuery->where('payment_type', 'tebus');
+            if ($search) {
+                $pembayaranQuery->whereHas('transaksi.anggota', fn($q) => $q->where('name', 'like', "%{$search}%"));
+            }
+            if ($year)  $pembayaranQuery->whereYear('confirmed_at', $year);
+            if ($month) $pembayaranQuery->whereMonth('confirmed_at', $month);
+
+            $items = $items->concat($pembayaranQuery->get()->map(fn($p) => [
+                'anggota'      => $p->transaksi?->anggota,
+                'jenis'        => 'Gadai - ' . $p->payment_type_label,
+                'badge'        => $p->payment_type === 'bunga' ? 'warning' : 'success',
+                'keterangan'   => ($p->transaksi?->jenisBarang?->name ?? '-') . ' · ' . ($p->transaksi?->reference_number ?? '-'),
+                'amount'       => $p->amount,
+                'confirmed_by' => $p->confirmedBy,
+                'confirmed_at' => $p->confirmed_at,
+                'detail_route' => $p->transaksi ? route('admin.gadai.transaksi', $p->transaksi) : null,
+            ]));
+        }
+
+        $items = $items->sortByDesc(fn($i) => $i['confirmed_at'])->values();
+
+        $perPage = 20;
+        $page    = $request->get('page', 1);
+        $pembayaran = new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         $summary = [
-            'total_pokok' => Simpanan::where('type','pokok')->where('status','confirmed')->sum('amount'),
-            'total_wajib' => Simpanan::where('type','wajib')->where('status','confirmed')->sum('amount'),
+            'total_simpanan' => Simpanan::confirmed()->sum('amount'),
+            'total_gadai'    => PembayaranGadai::confirmed()->sum('amount'),
         ];
 
-        $perAnggota = User::where('role','anggota')->where('account_status','active')
-            ->withSum(['simpanan as total_simpanan' => fn($q) => $q->where('status','confirmed')], 'amount')
-            ->having('total_simpanan', '>', 0)
-            ->orderByDesc('total_simpanan')
-            ->paginate(15);
-
-        return view('admin.simpanan.index', compact('simpanan','summary','perAnggota'));
+        return view('admin.simpanan.index', compact('pembayaran', 'summary'));
     }
 
     public function exportExcel()
     {
-        return $this->reportService->simpananExcel();
+        return $this->reportService->pembayaranExcel();
     }
 }
