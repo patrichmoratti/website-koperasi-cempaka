@@ -19,6 +19,7 @@ $title = 'Konfirmasi';
 </div>
 
 @if($tab === 'pembayaran_gadai')
+    <div x-data="{ openModal: null }">
     <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-100">
             <h3 class="section-title">Pembayaran Gadai Pending ({{ $counts['pembayaran_gadai'] }})</h3>
@@ -30,33 +31,26 @@ $title = 'Konfirmasi';
             </tr></thead>
             <tbody>
                 @forelse($pembayaranGadai as $p)
-                <tr>
+                <tr @click="openModal = 'pembayaran-{{ $p->id }}'" class="cursor-pointer">
                     <td class="font-medium">{{ $p->transaksi?->anggota?->name }}</td>
                     <td class="font-mono text-xs">{{ $p->transaksi?->reference_number }}</td>
                     <td><span class="badge-{{ $p->payment_type === 'tebus' ? 'info' : 'success' }}">{{ $p->payment_type_label }}</span></td>
                     <td class="font-medium">Rp {{ number_format($p->amount, 0, ',', '.') }}</td>
                     <td class="text-xs text-mony-muted">{{ $p->submitted_at->diffForHumans() }}</td>
-                    <td>
+                    <td @click.stop>
                         @if($p->transfer_proof_path)
-                            <a href="{{ asset('storage/' . $p->transfer_proof_path) }}" target="_blank"
-                               class="text-primary text-xs hover:underline">Lihat</a>
+                            <button type="button" @click.stop="$store.lb = { show: true, src: '{{ asset('storage/' . $p->transfer_proof_path) }}', type: 'image' }" class="text-primary text-xs hover:underline">Lihat</button>
                         @else <span class="text-mony-muted text-xs">-</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="flex gap-1" x-data="{ showReject: false }">
+                    <td @click.stop>
+                        <div class="flex gap-1">
                             <form method="POST" action="{{ route('admin.konfirmasi.pembayaran.confirm', $p) }}">
                                 @csrf
-                                <button class="btn-success btn-sm" onclick="return confirm('Konfirmasi pembayaran ini?')">Konfirmasi</button>
+                                <button class="btn-success btn-sm" onclick="return confirmAction(event, 'Konfirmasi pembayaran ini?', 'Ya, Konfirmasi')">Konfirmasi</button>
                             </form>
-                            <button @click="showReject = !showReject" class="btn-danger btn-sm">Tolak</button>
-                            <div x-show="showReject" class="absolute mt-10 bg-white border border-gray-200 rounded-xl shadow-lg p-4 z-10 w-64" style="display:none">
-                                <form method="POST" action="{{ route('admin.konfirmasi.pembayaran.reject', $p) }}">
-                                    @csrf
-                                    <textarea name="reason" class="form-input mb-2 text-xs" rows="2" placeholder="Alasan penolakan..." required></textarea>
-                                    <button type="submit" class="btn-danger btn-sm w-full">Tolak</button>
-                                </form>
-                            </div>
+                            <button type="button" class="btn-danger btn-sm"
+                                    onclick="openRejectModal('Alasan penolakan pembayaran {{ addslashes($p->transaksi?->anggota?->name) }}', '{{ route('admin.konfirmasi.pembayaran.reject', $p) }}')">Tolak</button>
                         </div>
                     </td>
                 </tr>
@@ -69,8 +63,13 @@ $title = 'Konfirmasi';
             <div class="px-4 py-3 border-t">{{ $pembayaranGadai->links() }}</div>
         @endif
     </div>
+    @foreach($pembayaranGadai as $p)
+        @include('partials.konfirmasi-modal', ['type' => 'pembayaran', 'item' => $p, 'routePrefix' => 'admin'])
+    @endforeach
+    </div>
 
 @elseif($tab === 'simpanan')
+    <div x-data="{ openModal: null }">
     <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-100">
             <h3 class="section-title">Simpanan Pending ({{ $counts['simpanan'] }})</h3>
@@ -82,33 +81,27 @@ $title = 'Konfirmasi';
             </tr></thead>
             <tbody>
                 @forelse($simpanan as $s)
-                <tr>
+                <tr @click="openModal = 'simpanan-{{ $s->id }}'" class="cursor-pointer">
                     <td class="font-medium">{{ $s->anggota?->name }}</td>
                     <td><span class="badge-{{ $s->type === 'pokok' ? 'info' : 'primary' }}">{{ $s->type_label }}</span></td>
                     <td class="text-xs">{{ $s->period_label }}</td>
                     <td class="font-medium">Rp {{ number_format($s->amount, 0, ',', '.') }}</td>
                     <td class="text-xs text-mony-muted">{{ $s->submitted_at->diffForHumans() }}</td>
-                    <td>
+                    <td @click.stop>
                         @if($s->transfer_proof_path)
                             <a href="{{ asset('storage/' . $s->transfer_proof_path) }}" target="_blank"
                                class="text-primary text-xs hover:underline">Lihat</a>
                         @else <span class="text-mony-muted text-xs">-</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="flex gap-1" x-data="{ showReject: false }">
+                    <td @click.stop>
+                        <div class="flex gap-1">
                             <form method="POST" action="{{ route('admin.konfirmasi.simpanan.confirm', $s) }}">
                                 @csrf
-                                <button class="btn-success btn-sm" onclick="return confirm('Konfirmasi simpanan ini?')">Konfirmasi</button>
+                                <button class="btn-success btn-sm" onclick="return confirmAction(event, 'Konfirmasi simpanan ini?', 'Ya, Konfirmasi')">Konfirmasi</button>
                             </form>
-                            <button @click="showReject = !showReject" class="btn-danger btn-sm">Tolak</button>
-                            <div x-show="showReject" class="mt-2" style="display:none">
-                                <form method="POST" action="{{ route('admin.konfirmasi.simpanan.reject', $s) }}">
-                                    @csrf
-                                    <textarea name="reason" class="form-input mb-1 text-xs" rows="2" placeholder="Alasan..." required></textarea>
-                                    <button type="submit" class="btn-danger btn-sm">Konfirmasi Tolak</button>
-                                </form>
-                            </div>
+                            <button type="button" class="btn-danger btn-sm"
+                                    onclick="openRejectModal('Alasan penolakan simpanan {{ addslashes($s->anggota?->name) }}', '{{ route('admin.konfirmasi.simpanan.reject', $s) }}')">Tolak</button>
                         </div>
                     </td>
                 </tr>
@@ -121,9 +114,14 @@ $title = 'Konfirmasi';
             <div class="px-4 py-3 border-t">{{ $simpanan->links() }}</div>
         @endif
     </div>
+    @foreach($simpanan as $s)
+        @include('partials.konfirmasi-modal', ['type' => 'simpanan', 'item' => $s, 'routePrefix' => 'admin'])
+    @endforeach
+    </div>
 
 @else
     {{-- Registrasi --}}
+    <div x-data="{ openModal: null }">
     <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-100">
             <h3 class="section-title">Registrasi Anggota Pending ({{ $counts['registrasi'] }})</h3>
@@ -134,38 +132,30 @@ $title = 'Konfirmasi';
             </tr></thead>
             <tbody>
                 @forelse($registrasi as $user)
-                <tr>
+                <tr @click="openModal = 'registrasi-{{ $user->id }}'" class="cursor-pointer">
                     <td class="font-medium">{{ $user->name }}</td>
                     <td class="text-xs">{{ $user->email }}</td>
                     <td class="font-mono text-xs">{{ $user->nik ?? '-' }}</td>
                     <td class="text-xs">{{ $user->phone ?? '-' }}</td>
-                    <td>
+                    <td @click.stop>
                         <div class="flex gap-1">
                             @if($user->ktp_photo)
-                                <a href="{{ asset('storage/' . $user->ktp_photo) }}" target="_blank"
-                                   class="text-xs text-primary hover:underline">KTP</a>
+                                <button type="button" @click.stop="$store.lb = { show: true, src: '{{ asset('storage/' . $user->ktp_photo) }}', type: 'image' }" class="text-xs text-primary hover:underline">KTP</button>
                             @endif
                             @if($user->selfie_photo)
-                                <a href="{{ asset('storage/' . $user->selfie_photo) }}" target="_blank"
-                                   class="text-xs text-primary hover:underline">Selfie</a>
+                                <button type="button" @click.stop="$store.lb = { show: true, src: '{{ asset('storage/' . $user->selfie_photo) }}', type: 'image' }" class="text-xs text-primary hover:underline">Selfie</button>
                             @endif
                         </div>
                     </td>
                     <td class="text-xs text-mony-muted">{{ $user->created_at->format('d/m/Y') }}</td>
-                    <td>
-                        <div class="flex gap-1" x-data="{ showReject: false }">
+                    <td @click.stop>
+                        <div class="flex gap-1">
                             <form method="POST" action="{{ route('admin.konfirmasi.registrasi.confirm', $user) }}">
                                 @csrf
-                                <button class="btn-success btn-sm" onclick="return confirm('Setujui registrasi {{ $user->name }}?')">Setujui</button>
+                                <button class="btn-success btn-sm" onclick="return confirmAction(event, 'Setujui registrasi {{ addslashes($user->name) }}?', 'Ya, Setujui')">Setujui</button>
                             </form>
-                            <button @click="showReject = !showReject" class="btn-danger btn-sm">Tolak</button>
-                            <div x-show="showReject" class="mt-2" style="display:none">
-                                <form method="POST" action="{{ route('admin.konfirmasi.registrasi.reject', $user) }}">
-                                    @csrf
-                                    <textarea name="reason" class="form-input mb-1 text-xs" rows="2" placeholder="Alasan..." required></textarea>
-                                    <button type="submit" class="btn-danger btn-sm">Tolak</button>
-                                </form>
-                            </div>
+                            <button type="button" class="btn-danger btn-sm"
+                                    onclick="openRejectModal('Alasan penolakan registrasi {{ addslashes($user->name) }}', '{{ route('admin.konfirmasi.registrasi.reject', $user) }}')">Tolak</button>
                         </div>
                     </td>
                 </tr>
@@ -177,6 +167,10 @@ $title = 'Konfirmasi';
         @if($registrasi->hasPages())
             <div class="px-4 py-3 border-t">{{ $registrasi->links() }}</div>
         @endif
+    </div>
+    @foreach($registrasi as $user)
+        @include('partials.konfirmasi-modal', ['type' => 'registrasi', 'item' => $user, 'routePrefix' => 'admin'])
+    @endforeach
     </div>
 @endif
 @endsection
