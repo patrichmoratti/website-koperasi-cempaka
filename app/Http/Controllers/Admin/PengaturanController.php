@@ -26,7 +26,6 @@ class PengaturanController extends Controller
             'bank_name'          => 'nullable|string|max:100',
             'bank_account_number'=> 'nullable|string|max:30',
             'bank_account_name'  => 'nullable|string|max:100',
-            'terms_and_conditions' => 'nullable|string',
         ]);
 
         if ($request->hasFile('logo')) {
