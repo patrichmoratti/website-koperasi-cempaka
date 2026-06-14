@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PembayaranGadai;
-use App\Models\BiayaOperasional;
+use App\Models\PengajuanGadai;
+use App\Models\Simpanan;
 use App\Models\TransaksiGadai;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
@@ -18,31 +19,33 @@ class LaporanController extends Controller
         $year  = (int) ($request->year  ?? now()->year);
         $month = $request->month ? (int) $request->month : null;
 
-        $queryIncome = PembayaranGadai::where('status','confirmed')->whereYear('confirmed_at',$year);
-        $queryBiaya  = BiayaOperasional::whereYear('date',$year);
+        $queryIncome    = PembayaranGadai::with('transaksi.anggota')->where('status','confirmed')->whereYear('confirmed_at',$year);
+        $querySimpanan  = Simpanan::confirmed()->whereYear('confirmed_at',$year);
+        $queryPengajuan = PengajuanGadai::with(['anggota','jenisBarang'])->whereYear('submitted_at',$year);
 
         if ($month) {
             $queryIncome->whereMonth('confirmed_at',$month);
-            $queryBiaya->whereMonth('date',$month);
+            $querySimpanan->whereMonth('confirmed_at',$month);
+            $queryPengajuan->whereMonth('submitted_at',$month);
         }
 
-        $pendapatan   = $queryIncome->get();
-        $biaya        = $queryBiaya->get();
-        $totalIncome  = $pendapatan->sum('amount');
-        $totalExpense = $biaya->sum('amount');
-        $laba         = $totalIncome - $totalExpense;
+        $pendapatan     = $queryIncome->latest('confirmed_at')->get();
+        $totalIncome    = $pendapatan->sum('amount');
+        $totalSimpanan  = $querySimpanan->sum('amount');
+        $pengajuan      = $queryPengajuan->latest('submitted_at')->get();
+        $totalPengajuan = $pengajuan->sum('loan_request_amount');
 
         // Monthly breakdown for chart
-        $monthlyIncome  = [];
-        $monthlyExpense = [];
-        $labels         = [];
+        $monthlyIncome   = [];
+        $monthlySimpanan = [];
+        $labels          = [];
         for ($m = 1; $m <= 12; $m++) {
-            $labels[]         = \Carbon\Carbon::create($year,$m)->isoFormat('MMM');
-            $monthlyIncome[]  = PembayaranGadai::where('status','confirmed')->whereYear('confirmed_at',$year)->whereMonth('confirmed_at',$m)->sum('amount');
-            $monthlyExpense[] = BiayaOperasional::whereYear('date',$year)->whereMonth('date',$m)->sum('amount');
+            $labels[]            = \Carbon\Carbon::create($year,$m)->isoFormat('MMM');
+            $monthlyIncome[]     = PembayaranGadai::where('status','confirmed')->whereYear('confirmed_at',$year)->whereMonth('confirmed_at',$m)->sum('amount');
+            $monthlySimpanan[]   = Simpanan::confirmed()->whereYear('confirmed_at',$year)->whereMonth('confirmed_at',$m)->sum('amount');
         }
 
-        return view('admin.laporan.keuangan', compact('year','month','pendapatan','biaya','totalIncome','totalExpense','laba','labels','monthlyIncome','monthlyExpense'));
+        return view('admin.laporan.keuangan', compact('year','month','pendapatan','totalIncome','totalSimpanan','pengajuan','totalPengajuan','labels','monthlyIncome','monthlySimpanan'));
     }
 
     public function gadai(Request $request)

@@ -5,8 +5,7 @@ namespace App\Services;
 use App\Models\KoperasiInfo;
 use App\Models\TransaksiGadai;
 use App\Models\Simpanan;
-use App\Models\BiayaOperasional;
-use App\Models\ShuDistribution;
+use App\Models\PengajuanGadai;
 use App\Models\PembayaranGadai;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,21 +18,23 @@ class ReportService
 {
     public function keuanganPdf(int $year, ?int $month = null): Response
     {
-        $info       = KoperasiInfo::getInstance();
-        $query      = PembayaranGadai::with('transaksi')->where('status', 'confirmed')->whereYear('confirmed_at', $year);
-        $biayaQuery = BiayaOperasional::whereYear('date', $year);
+        $info           = KoperasiInfo::getInstance();
+        $query          = PembayaranGadai::with('transaksi.anggota')->where('status', 'confirmed')->whereYear('confirmed_at', $year);
+        $simpananQuery  = Simpanan::confirmed()->whereYear('confirmed_at', $year);
+        $pengajuanQuery = PengajuanGadai::with(['anggota', 'jenisBarang'])->whereYear('submitted_at', $year);
 
         if ($month) {
             $query->whereMonth('confirmed_at', $month);
-            $biayaQuery->whereMonth('date', $month);
+            $simpananQuery->whereMonth('confirmed_at', $month);
+            $pengajuanQuery->whereMonth('submitted_at', $month);
         }
 
-        $pendapatan = $query->get();
-        $biaya      = $biayaQuery->get();
-        $totalIn    = $pendapatan->sum('amount');
-        $totalOut   = $biaya->sum('amount');
+        $pendapatan    = $query->get();
+        $totalIn       = $pendapatan->sum('amount');
+        $totalSimpanan = $simpananQuery->sum('amount');
+        $pengajuan     = $pengajuanQuery->latest('submitted_at')->get();
 
-        $pdf = Pdf::loadView('reports.keuangan-pdf', compact('info', 'pendapatan', 'biaya', 'totalIn', 'totalOut', 'year', 'month'));
+        $pdf = Pdf::loadView('reports.keuangan-pdf', compact('info', 'pendapatan', 'totalIn', 'totalSimpanan', 'pengajuan', 'year', 'month'));
         $pdf->setPaper('A4', 'portrait');
 
         return $pdf->download("laporan-keuangan-{$year}.pdf");
@@ -45,16 +46,6 @@ class ReportService
         $pdf  = Pdf::loadView('reports.gadai-detail-pdf', compact('info', 'transaksi'));
         $pdf->setPaper('A4', 'portrait');
         return $pdf->download("transaksi-{$transaksi->reference_number}.pdf");
-    }
-
-    public function shuPdf(int $periodId): Response
-    {
-        $info          = KoperasiInfo::getInstance();
-        $distributions = ShuDistribution::with(['anggota', 'period'])->where('shu_period_id', $periodId)->get();
-        $period        = $distributions->first()?->period;
-        $pdf           = Pdf::loadView('reports.shu-pdf', compact('info', 'distributions', 'period'));
-        $pdf->setPaper('A4', 'landscape');
-        return $pdf->download("distribusi-shu-{$period?->year}.pdf");
     }
 
     public function gadaiExcel(): \Symfony\Component\HttpFoundation\BinaryFileResponse
@@ -81,46 +72,35 @@ class ReportService
         }, 'data-gadai.xlsx');
     }
 
-    public function simpananExcel(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function pembayaranExcel(): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
-        $data = Simpanan::with('anggota')->latest()->get()->map(fn($s) => [
-            $s->anggota->name,
+        $simpanan = Simpanan::with(['anggota', 'confirmedBy'])->confirmed()->get()->map(fn($s) => [
+            $s->anggota?->name ?? '-',
             $s->type_label,
-            $s->period_label,
+            'Periode ' . $s->period_label,
             number_format($s->amount, 0, ',', '.'),
-            $s->status,
+            $s->confirmedBy?->name ?? '-',
             $s->confirmed_at?->format('d/m/Y') ?? '-',
-        ])->toArray();
+        ]);
+
+        $gadai = PembayaranGadai::with(['transaksi.anggota', 'transaksi.jenisBarang', 'confirmedBy'])->confirmed()->get()->map(fn($p) => [
+            $p->transaksi?->anggota?->name ?? '-',
+            'Gadai - ' . $p->payment_type_label,
+            ($p->transaksi?->jenisBarang?->name ?? '-') . ' · ' . ($p->transaksi?->reference_number ?? '-'),
+            number_format($p->amount, 0, ',', '.'),
+            $p->confirmedBy?->name ?? '-',
+            $p->confirmed_at?->format('d/m/Y') ?? '-',
+        ]);
+
+        $data = $simpanan->concat($gadai)->toArray();
 
         return Excel::download(new class($data) implements FromArray, WithHeadings, WithTitle {
             public function __construct(private array $data) {}
             public function array(): array { return $this->data; }
             public function headings(): array {
-                return ['Anggota','Tipe','Periode','Jumlah','Status','Tgl Konfirmasi'];
+                return ['Anggota','Jenis','Keterangan','Jumlah','Disetujui Oleh','Tgl Disetujui'];
             }
-            public function title(): string { return 'Data Simpanan'; }
-        }, 'data-simpanan.xlsx');
-    }
-
-    public function shuExcel(int $periodId): \Symfony\Component\HttpFoundation\BinaryFileResponse
-    {
-        $data = ShuDistribution::with(['anggota','period'])->where('shu_period_id', $periodId)->get()->map(fn($d) => [
-            $d->anggota->name,
-            number_format($d->total_savings, 0, ',', '.'),
-            number_format($d->member_jasa_modal, 0, ',', '.'),
-            number_format($d->total_interest_paid, 0, ',', '.'),
-            number_format($d->member_jasa_usaha, 0, ',', '.'),
-            number_format($d->total_shu_received, 0, ',', '.'),
-            $d->withdrawal_status === 'withdrawn' ? 'Sudah Dicairkan' : 'Belum Dicairkan',
-        ])->toArray();
-
-        return Excel::download(new class($data) implements FromArray, WithHeadings, WithTitle {
-            public function __construct(private array $data) {}
-            public function array(): array { return $this->data; }
-            public function headings(): array {
-                return ['Anggota','Total Simpanan','Jasa Modal','Total Bunga Dibayar','Jasa Usaha','Total SHU','Status'];
-            }
-            public function title(): string { return 'Distribusi SHU'; }
-        }, 'distribusi-shu.xlsx');
+            public function title(): string { return 'Data Pembayaran'; }
+        }, 'data-pembayaran.xlsx');
     }
 }

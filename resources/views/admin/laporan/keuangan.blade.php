@@ -36,28 +36,32 @@ $title = 'Laporan Keuangan';
     </form>
 </div>
 
-{{-- Summary Cards --}}
-<div class="grid grid-cols-3 gap-4 mb-6">
-    <div class="stat-card bg-green-50 border-green-100">
-        <span class="stat-label text-green-700">Total Pemasukan</span>
-        <span class="stat-value text-xl text-green-700">Rp {{ number_format($totalIncome, 0, ',', '.') }}</span>
-    </div>
-    <div class="stat-card bg-red-50 border-red-100">
-        <span class="stat-label text-red-700">Total Pengeluaran</span>
-        <span class="stat-value text-xl text-red-700">Rp {{ number_format($totalExpense, 0, ',', '.') }}</span>
-    </div>
-    <div class="stat-card {{ $laba >= 0 ? 'bg-primary/5' : 'bg-red-50' }}">
-        <span class="stat-label">Laba Bersih</span>
-        <span class="stat-value text-xl {{ $laba >= 0 ? 'text-primary' : 'text-red-600' }}">
-            Rp {{ number_format(abs($laba), 0, ',', '.') }}
-            {{ $laba < 0 ? '(Rugi)' : '' }}
-        </span>
+{{-- Summary Strip --}}
+<div class="card p-0 mb-6 overflow-hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-3">
+        @php
+        $summaryStrip = [
+            ['label' => 'Total Pemasukan Gadai', 'value' => 'Rp '.number_format($totalIncome, 0, ',', '.'), 'sub' => 'bunga & tebus', 'style' => 'color:var(--green)', 'bg' => 'var(--green-light)'],
+            ['label' => 'Total Simpanan Masuk', 'value' => 'Rp '.number_format($totalSimpanan, 0, ',', '.'), 'sub' => 'pokok & wajib', 'style' => 'color:#3B82F6', 'bg' => '#e7f0fb'],
+            ['label' => 'Pengajuan Gadai', 'value' => number_format($pengajuan->count()), 'sub' => 'Rp '.number_format($totalPengajuan, 0, ',', '.').' diajukan', 'style' => 'color:#D97706', 'bg' => '#fdf1de'],
+        ];
+        @endphp
+        @foreach($summaryStrip as $i => $s)
+        <div class="flex items-center gap-3 p-4 {{ $i < 2 ? 'border-b sm:border-b-0 sm:border-r' : '' }}" style="border-color:#eef3ea">
+            <div class="w-2 h-10 rounded-full flex-shrink-0" style="background:{{ $s['bg'] }}; border:2px solid; border-color:{{ $s['style'] }};"></div>
+            <div>
+                <p class="text-xs text-mony-muted">{{ $s['label'] }}</p>
+                <p class="text-base font-bold" style="{{ $s['style'] }}">{{ $s['value'] }}</p>
+                <p class="text-xs text-mony-muted">{{ $s['sub'] }}</p>
+            </div>
+        </div>
+        @endforeach
     </div>
 </div>
 
 {{-- Chart --}}
 <div class="card p-5 mb-6">
-    <h3 class="section-title mb-4">Pemasukan vs Pengeluaran per Bulan ({{ $year }})</h3>
+    <h3 class="section-title mb-4">Pemasukan Gadai vs Simpanan Masuk per Bulan ({{ $year }})</h3>
     <div class="h-64">
         <canvas id="keuanganChart"></canvas>
     </div>
@@ -67,7 +71,7 @@ $title = 'Laporan Keuangan';
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-100">
-            <h3 class="section-title">Pendapatan Bunga</h3>
+            <h3 class="section-title">Pendapatan Bunga & Tebus</h3>
         </div>
         <div class="max-h-64 overflow-y-auto">
             <table class="table-base">
@@ -91,22 +95,23 @@ $title = 'Laporan Keuangan';
 
     <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-100">
-            <h3 class="section-title">Biaya Operasional</h3>
+            <h3 class="section-title">Pengajuan Gadai</h3>
         </div>
         <div class="max-h-64 overflow-y-auto">
             <table class="table-base">
-                <thead><tr><th>Kategori</th><th>Keterangan</th><th>Jumlah</th><th>Tanggal</th></tr></thead>
+                <thead><tr><th>Anggota</th><th>Barang</th><th>Nilai Diajukan</th><th>Status</th><th>Tanggal</th></tr></thead>
                 <tbody>
-                    @foreach($biaya->take(20) as $b)
+                    @foreach($pengajuan->take(20) as $p)
                     <tr>
-                        <td class="text-xs font-medium">{{ $b->category }}</td>
-                        <td class="text-xs text-mony-muted">{{ Str::limit($b->description, 40) }}</td>
-                        <td class="font-medium text-sm">Rp {{ number_format($b->amount, 0, ',', '.') }}</td>
-                        <td class="text-xs text-mony-muted">{{ $b->date->format('d/m/Y') }}</td>
+                        <td class="text-xs">{{ $p->anggota?->name }}</td>
+                        <td class="text-xs text-mony-muted">{{ $p->jenisBarang?->name }}</td>
+                        <td class="font-medium text-sm">Rp {{ number_format($p->loan_request_amount, 0, ',', '.') }}</td>
+                        <td><span class="badge-{{ $p->status_color }} text-xs">{{ $p->status_label }}</span></td>
+                        <td class="text-xs text-mony-muted">{{ $p->submitted_at?->format('d/m/Y') }}</td>
                     </tr>
                     @endforeach
-                    @if($biaya->isEmpty())
-                        <tr><td colspan="4" class="text-center py-4 text-mony-muted text-sm">Tidak ada data</td></tr>
+                    @if($pengajuan->isEmpty())
+                        <tr><td colspan="5" class="text-center py-4 text-mony-muted text-sm">Tidak ada data</td></tr>
                     @endif
                 </tbody>
             </table>
@@ -121,8 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: @json($labels),
             datasets: [
-                { label: 'Pemasukan', data: @json($monthlyIncome), backgroundColor: '#00BFA580', borderColor: '#00BFA5', borderWidth: 1, borderRadius: 4 },
-                { label: 'Pengeluaran', data: @json($monthlyExpense), backgroundColor: '#EF444480', borderColor: '#EF4444', borderWidth: 1, borderRadius: 4 },
+                { label: 'Pemasukan Gadai', data: @json($monthlyIncome), backgroundColor: '#00BFA580', borderColor: '#00BFA5', borderWidth: 1, borderRadius: 4 },
+                { label: 'Simpanan Masuk', data: @json($monthlySimpanan), backgroundColor: '#3B82F680', borderColor: '#3B82F6', borderWidth: 1, borderRadius: 4 },
             ]
         },
         options: {

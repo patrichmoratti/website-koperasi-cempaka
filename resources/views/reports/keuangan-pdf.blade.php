@@ -33,20 +33,20 @@
 
 <div class="summary" style="display:table; width:100%;">
     <div style="display:table-cell; width:33%; border:1px solid #e5e7eb; border-radius:4px; padding:8px; text-align:center;">
-        <div style="font-size:8px; color:#6B7280;">TOTAL PEMASUKAN</div>
+        <div style="font-size:8px; color:#6B7280;">TOTAL PEMASUKAN GADAI</div>
         <div style="font-size:13px; font-weight:bold; color:#10B981;">Rp {{ number_format($totalIn, 0, ',', '.') }}</div>
     </div>
     <div style="display:table-cell; width:33%; padding-left:8px; border:1px solid #e5e7eb; border-radius:4px; padding:8px; text-align:center;">
-        <div style="font-size:8px; color:#6B7280;">TOTAL PENGELUARAN</div>
-        <div style="font-size:13px; font-weight:bold; color:#EF4444;">Rp {{ number_format($totalOut, 0, ',', '.') }}</div>
+        <div style="font-size:8px; color:#6B7280;">TOTAL SIMPANAN MASUK</div>
+        <div style="font-size:13px; font-weight:bold; color:#3B82F6;">Rp {{ number_format($totalSimpanan, 0, ',', '.') }}</div>
     </div>
     <div style="display:table-cell; width:33%; padding-left:8px; border:1px solid #00BFA5; border-radius:4px; padding:8px; text-align:center;">
-        <div style="font-size:8px; color:#6B7280;">LABA BERSIH</div>
-        <div style="font-size:13px; font-weight:bold; color:#00BFA5;">Rp {{ number_format($totalIn - $totalOut, 0, ',', '.') }}</div>
+        <div style="font-size:8px; color:#6B7280;">PENGAJUAN GADAI</div>
+        <div style="font-size:13px; font-weight:bold; color:#00BFA5;">{{ $pengajuan->count() }} Pengajuan</div>
     </div>
 </div>
 
-<p style="font-size:11px; font-weight:bold; margin-top:15px;">Detail Pendapatan Bunga</p>
+<p style="font-size:11px; font-weight:bold; margin-top:15px;">Detail Pendapatan Bunga & Tebus</p>
 <table>
     <thead><tr><th>Anggota</th><th>Tipe</th><th>Jumlah</th><th>Tgl Konfirmasi</th></tr></thead>
     <tbody>
@@ -66,22 +66,22 @@
     </tbody>
 </table>
 
-<p style="font-size:11px; font-weight:bold; margin-top:10px;">Detail Biaya Operasional</p>
+<p style="font-size:11px; font-weight:bold; margin-top:10px;">Detail Pengajuan Gadai</p>
 <table>
-    <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Jumlah</th></tr></thead>
+    <thead><tr><th>Tanggal</th><th>Anggota</th><th>Barang</th><th>Nilai Diajukan</th><th>Status</th></tr></thead>
     <tbody>
-        @foreach($biaya as $b)
+        @foreach($pengajuan as $p)
         <tr>
-            <td>{{ $b->date->format('d/m/Y') }}</td>
-            <td>{{ $b->category }}</td>
-            <td>{{ $b->description }}</td>
-            <td>Rp {{ number_format($b->amount, 0, ',', '.') }}</td>
+            <td>{{ $p->submitted_at?->format('d/m/Y') }}</td>
+            <td>{{ $p->anggota?->name }}</td>
+            <td>{{ $p->jenisBarang?->name }}</td>
+            <td>Rp {{ number_format($p->loan_request_amount, 0, ',', '.') }}</td>
+            <td>{{ $p->status_label }}</td>
         </tr>
         @endforeach
-        <tr style="font-weight:bold; background:#f9fafb;">
-            <td colspan="3">TOTAL</td>
-            <td>Rp {{ number_format($totalOut, 0, ',', '.') }}</td>
-        </tr>
+        @if($pengajuan->isEmpty())
+        <tr><td colspan="5">Tidak ada data</td></tr>
+        @endif
     </tbody>
 </table>
 
