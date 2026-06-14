@@ -4,23 +4,46 @@ $title = 'Dashboard Pengurus';
 @endphp
 @section('content')
 <div class="mb-6">
-    <h1 class="page-title">Dashboard Pengurus</h1>
+    <h1 class="text-2xl font-bold text-mony-text tracking-tight">Dashboard Pengurus</h1>
     <p class="text-sm text-mony-muted mt-1">Selamat datang, {{ auth()->user()->name }}</p>
 </div>
 
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    @foreach([
-        ['Pengajuan Gadai', $stats['pending_pengajuan'], 'warning', 'admin.gadai.index?tab=pengajuan'],
-        ['Pembayaran', $stats['pending_pembayaran'], 'danger', 'admin.konfirmasi.index?tab=pembayaran_gadai'],
-        ['Simpanan', $stats['pending_simpanan'], 'info', 'admin.konfirmasi.index?tab=simpanan'],
-        ['Registrasi', $stats['pending_registrasi'], 'primary', 'admin.konfirmasi.index?tab=registrasi'],
-    ] as [$label, $count, $color, $route])
-    <a href="{{ url($route) }}" class="stat-card hover:shadow-card-hover transition-shadow">
-        <span class="stat-label">{{ $label }}</span>
-        <span class="stat-value text-3xl {{ $count > 0 ? 'text-' . $color . '-600' : '' }}">{{ $count }}</span>
-        <span class="badge-{{ $color }} w-fit">Pending</span>
-    </a>
-    @endforeach
+{{-- KPI Strip --}}
+<div class="card p-0 mb-6 overflow-hidden">
+    <div class="grid grid-cols-2 lg:grid-cols-4">
+        @php
+        $kpis = [
+            ['label' => 'Pengajuan Gadai', 'count' => $stats['pending_pengajuan'], 'color' => 'warning',  'bg' => '#fdf1de', 'icon' => 'text-amber-600',  'route' => 'admin.gadai.index?tab=pengajuan',
+                'path' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+            ['label' => 'Pembayaran',     'count' => $stats['pending_pembayaran'], 'color' => 'danger', 'bg' => '#fde2e2', 'icon' => 'text-red-600',    'route' => 'admin.konfirmasi.index?tab=pembayaran_gadai',
+                'path' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Simpanan',       'count' => $stats['pending_simpanan'], 'color' => 'info',    'bg' => '#e7f0fb', 'icon' => 'text-blue-600',   'route' => 'admin.konfirmasi.index?tab=simpanan',
+                'path' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+            ['label' => 'Registrasi',     'count' => $stats['pending_registrasi'], 'color' => 'primary', 'bg' => 'var(--green-light)', 'icon' => '', 'iconStyle' => 'color:var(--green)', 'route' => 'admin.konfirmasi.index?tab=registrasi',
+                'path' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
+        ];
+        @endphp
+        @foreach($kpis as $i => $kpi)
+        @php
+            $borderClasses = ($i % 2 === 0 ? 'border-r ' : '')
+                . ($i < 3 ? 'lg:border-r ' : '')
+                . ($i >= 2 ? 'border-t lg:border-t-0' : '');
+        @endphp
+        <a href="{{ url($kpi['route']) }}"
+           class="flex items-center gap-3 p-5 hover:bg-gray-50/60 transition-colors {{ $borderClasses }}"
+           style="border-color:#eef3ea">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:{{ $kpi['bg'] }}">
+                <svg class="w-5 h-5 {{ $kpi['icon'] }}" style="{{ $kpi['iconStyle'] ?? '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $kpi['path'] }}"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs text-mony-muted">{{ $kpi['label'] }}</p>
+                <p class="text-xl font-bold text-mony-text leading-tight">{{ $kpi['count'] }}
+                    @if($kpi['count'] > 0)<span class="badge-{{ $kpi['color'] }} text-xs ml-1 align-middle">Pending</span>@endif
+                </p>
+            </div>
+        </a>
+        @endforeach
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

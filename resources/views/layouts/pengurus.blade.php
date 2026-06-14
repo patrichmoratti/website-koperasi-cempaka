@@ -7,7 +7,7 @@
     <title>{{ $title ?? 'Pengurus' }} â€” MONY KSP</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-mony-bg font-sans"
+<body class="h-full font-sans app-layout" style="background: var(--green)"
       x-data="{ sidebarOpen: window.innerWidth >= 1024 }"
       @resize.window="sidebarOpen = window.innerWidth >= 1024">
 
@@ -19,12 +19,7 @@
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
         <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-            <div class="w-9 h-9 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
+            <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY" class="w-9 h-9 rounded-xl object-contain flex-shrink-0">
             <div>
                 <p class="font-bold text-mony-text text-sm">MONY</p>
                 <p class="text-xs text-mony-muted">KSP Cempaka</p>
@@ -70,15 +65,15 @@
                 Anggota
             </a>
 
-            <a href="{{ route('pengurus.biaya.create') }}"
-               class="sidebar-link {{ request()->routeIs('pengurus.biaya.*') ? 'active' : '' }}">
+            <a href="{{ route('pengurus.riwayat.index') }}"
+               class="sidebar-link {{ request()->routeIs('pengurus.riwayat.*') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Catat Biaya
+                Riwayat
             </a>
 
-            <a href="{{ route('pengurus.pesan.index') }}"
+<a href="{{ route('pengurus.pesan.index') }}"
                class="sidebar-link {{ request()->routeIs('pengurus.pesan.*') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
@@ -109,30 +104,33 @@
     </aside>
 
     <div class="transition-all duration-200" :class="sidebarOpen ? 'lg:ml-64' : 'ml-0'">
-        <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+        <header class="sticky top-0 z-20 backdrop-blur px-4 py-3 flex items-center justify-between border-b"
+                style="background: rgba(15,42,30,0.92); border-color: rgba(255,255,255,0.1)">
             <div class="flex items-center gap-3">
                 <button @click="sidebarOpen = !sidebarOpen"
-                        class="p-2 rounded-lg text-mony-muted hover:bg-gray-100 transition-colors">
+                        class="p-2 rounded-lg transition-colors" style="color: rgba(255,255,255,0.7)"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'"
+                        onmouseout="this.style.background='transparent'; this.style.color='rgba(255,255,255,0.7)'">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
                 @isset($breadcrumbs)
-                    <nav class="hidden sm:flex items-center gap-1 text-sm text-mony-muted">
+                    <nav class="hidden sm:flex items-center gap-1 text-sm">
                         @foreach($breadcrumbs as $crumb)
                             @if(!$loop->last)
-                                <a href="{{ $crumb['url'] ?? '#' }}" class="hover:text-primary">{{ $crumb['label'] }}</a>
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <a href="{{ $crumb['url'] ?? '#' }}" class="transition-colors" style="color: rgba(255,255,255,0.55)" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">{{ $crumb['label'] }}</a>
+                                <svg class="w-3 h-3" style="color: rgba(255,255,255,0.4)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
                             @else
-                                <span class="text-mony-text font-medium">{{ $crumb['label'] }}</span>
+                                <span class="font-medium" style="color: white">{{ $crumb['label'] }}</span>
                             @endif
                         @endforeach
                     </nav>
                 @endisset
             </div>
-            <span class="hidden sm:block text-sm font-medium text-mony-text">{{ auth()->user()->name }}</span>
+            <span class="hidden sm:block text-sm font-medium" style="color: white">{{ auth()->user()->name }}</span>
         </header>
 
         @if(session('success'))
@@ -155,6 +153,9 @@
         </main>
     </div>
 
+    @include('partials.confirm-modal')
+    @include('partials.reject-modal')
+    @include('partials.lightbox')
 </body>
 </html>
 
