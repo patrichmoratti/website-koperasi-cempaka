@@ -27,8 +27,10 @@ $title = 'Detail Pengajuan';
         <p class="text-mony-muted text-sm mb-2">Foto Barang</p>
         <div class="grid grid-cols-3 gap-2">
             @foreach($pengajuan->item_photo_paths as $photo)
-                <img src="{{ asset('storage/' . $photo) }}" class="h-24 w-full object-cover rounded-lg border border-gray-200 cursor-pointer"
-                     onclick="window.open('{{ asset('storage/' . $photo) }}')">
+                <div @click="$store.lb = { show: true, src: '{{ asset('storage/' . $photo) }}', type: 'image' }"
+                     class="rounded-lg overflow-hidden border border-gray-200 cursor-pointer group" style="height:6rem;">
+                    <img src="{{ asset('storage/' . $photo) }}" class="w-full h-full object-cover group-hover:opacity-85 transition-opacity">
+                </div>
             @endforeach
         </div>
     </div>
