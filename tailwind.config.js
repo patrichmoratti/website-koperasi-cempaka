@@ -10,6 +10,12 @@ export default {
         './resources/js/**/*.js',
     ],
 
+    // Badge classes are often built dynamically (e.g. `badge-{{ $cond ? 'info' : 'primary' }}`),
+    // so the content scanner can't see the full class name — keep them all in the build.
+    safelist: [
+        { pattern: /^badge-(success|danger|warning|info|gray|primary|purple|gold)$/ },
+    ],
+
     theme: {
         extend: {
             fontFamily: {

@@ -105,13 +105,8 @@
 
         <!-- Logo -->
         <a href="/" class="flex items-center gap-3 group">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                 style="background: var(--green)">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
+            <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY"
+                 class="w-9 h-9 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105">
             <div>
                 <span class="font-display font-bold text-xl tracking-tight" style="color: var(--green)">MONY</span>
                 <span class="hidden sm:block text-xs" style="color: var(--text-muted); margin-top: -2px;">KSP Cempaka</span>
@@ -268,79 +263,18 @@
                 </div>
             </div>
 
-            <!-- Right: Floating Cards Illustration -->
-            <div class="relative hidden lg:flex items-center justify-center h-[520px]">
+            <!-- Right: Photo -->
+            <div class="hidden lg:block reveal relative" data-delay="200">
+                <!-- Green glow shadow -->
+                <div class="absolute -inset-6 rounded-3xl blur-2xl opacity-40" style="background: var(--green)"></div>
 
-                <!-- Main card -->
-                <div class="float-card absolute w-72 rounded-3xl p-6 shadow-2xl z-20"
-                     style="background: var(--green); top: 10%; left: 5%">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-xs font-medium" style="color: rgba(255,255,255,0.6)">Gadai Aktif</p>
-                            <p class="text-2xl font-bold text-white font-mono mt-0.5">{{ number_format($stats['gadai']) }}</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center"
-                             style="background: rgba(201,168,76,0.2)">
-                            <svg class="w-6 h-6" style="color: var(--gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="h-1 rounded-full" style="background: rgba(255,255,255,0.2)">
-                        <div class="h-1 rounded-full w-3/4" style="background: var(--gold)"></div>
-                    </div>
-                    <p class="text-xs mt-2" style="color: rgba(255,255,255,0.5)">Transaksi terlayani</p>
-                </div>
-
-                <!-- Savings card -->
-                <div class="float-card-slow absolute w-64 rounded-3xl p-5 shadow-xl z-10"
-                     style="background: var(--cream-white); border: 1px solid rgba(26,61,46,0.1); top: 45%; right: 0%">
-                    <p class="text-xs font-medium" style="color: var(--text-muted)">Total Simpanan</p>
-                    <p class="text-xl font-bold mt-1 font-mono" style="color: var(--green)">
-                        Rp {{ number_format($stats['simpanan'] / 1000000, 1) }}jt
-                    </p>
-                    <div class="flex items-center gap-2 mt-3">
-                        <div class="flex gap-1">
-                            @for($i=0;$i<5;$i++)
-                            <div class="w-6 h-1.5 rounded-full" style="background: {{ $i < 4 ? 'var(--green)' : 'var(--green-light)' }}"></div>
-                            @endfor
-                        </div>
-                        <span class="text-xs" style="color: var(--text-muted)">Terkumpul</span>
-                    </div>
-                </div>
-
-                <!-- Jenis barang card -->
-                <div class="float-card-slower absolute w-56 rounded-3xl p-5 shadow-xl z-30"
-                     style="background: var(--gold); bottom: 8%; left: 15%">
-                    <p class="text-xs font-medium text-white/70">Jenis Barang Gadai</p>
-                    <p class="text-2xl font-bold text-white font-mono mt-1">{{ $stats['jenis'] }}</p>
-                    <p class="text-xs text-white/60 mt-1">Kategori tersedia</p>
-                    <div class="flex gap-1 mt-3">
-                        @foreach($katalog->take(4) as $k)
-                        <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                             style="background: rgba(255,255,255,0.25)">
-                            {{ strtoupper(substr($k->name, 0, 1)) }}
-                        </div>
-                        @endforeach
-                        @if($katalog->count() > 4)
-                        <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                             style="background: rgba(255,255,255,0.15)">+{{ $katalog->count() - 4 }}</div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Decorative dots grid -->
-                <div class="absolute top-8 right-8 grid grid-cols-5 gap-2 opacity-20">
-                    @for($i=0; $i<25; $i++)
-                    <div class="w-1.5 h-1.5 rounded-full" style="background: var(--green)"></div>
-                    @endfor
-                </div>
-
-                <!-- Gold ring -->
-                <div class="absolute w-80 h-80 rounded-full border-2 opacity-10 animate-spin-slow"
-                     style="border-color: var(--gold); border-style: dashed; top: 50%; left: 50%; transform: translate(-50%, -50%)">
+                <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+                    <img src="{{ asset('images/cempaka.jpeg') }}" alt="Koperasi Cempaka"
+                         class="w-full h-[520px] object-cover object-center">
+                    <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(26,61,46,0.35), transparent 50%)"></div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -370,7 +304,7 @@
 ════════════════════════════════════════════════════ -->
 <div class="py-4 overflow-hidden border-y" style="background: var(--green); border-color: rgba(255,255,255,0.1)">
     <div class="marquee-inner whitespace-nowrap inline-flex gap-8">
-        @foreach(['Proses Cepat', 'Bunga Kompetitif 8%/bln', 'Aman & Terjamin', 'Mudah & Transparan', 'Bebas Biaya Admin', 'Notifikasi Real-time', 'Proses Digital', 'SHU Tahunan', 'Proses Cepat', 'Bunga Kompetitif 8%/bln', 'Aman & Terjamin', 'Mudah & Transparan', 'Bebas Biaya Admin', 'Notifikasi Real-time', 'Proses Digital', 'SHU Tahunan'] as $tag)
+        @foreach(['Proses Cepat', 'Bunga Kompetitif 8%/bln', 'Aman & Terjamin', 'Mudah & Transparan', 'Bebas Biaya Admin', 'Notifikasi Real-time', 'Proses Digital', 'Proses Cepat', 'Bunga Kompetitif 8%/bln', 'Aman & Terjamin', 'Mudah & Transparan', 'Bebas Biaya Admin', 'Notifikasi Real-time', 'Proses Digital'] as $tag)
         <span class="inline-flex items-center gap-2 text-sm font-medium" style="color: rgba(255,255,255,0.8)">
             <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background: var(--gold)"></span>
             {{ $tag }}
@@ -388,70 +322,15 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            <!-- Left: Green decorative card -->
+            <!-- Left: Profile photo card -->
             <div class="reveal-left relative">
-                <div class="relative rounded-3xl overflow-hidden" style="background: var(--green)">
-                    <!-- Dots pattern -->
-                    <div class="absolute top-6 right-6 grid grid-cols-6 gap-1.5 opacity-20">
-                        @for($i=0;$i<36;$i++)
-                        <div class="w-1 h-1 rounded-full bg-white"></div>
-                        @endfor
-                    </div>
-
-                    <div class="relative p-10">
-                        <!-- Logo -->
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(201,168,76,0.2)">
-                                <svg class="w-5 h-5" style="color: var(--gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <span class="text-white font-display font-bold text-xl">MONY</span>
-                        </div>
-
-                        <h3 class="text-white font-display text-2xl font-bold mb-4 leading-tight">
-                            {{ $info->name }}
-                        </h3>
-
-                        <p class="text-sm leading-relaxed mb-8" style="color: rgba(255,255,255,0.65)">
-                            Koperasi simpan pinjam yang berdiri dengan komitmen melayani kebutuhan finansial anggota secara adil, transparan, dan profesional.
-                        </p>
-
-                        <!-- Info grid -->
-                        <div class="grid grid-cols-2 gap-4">
-                            @foreach([
-                                ['label' => 'Nomor Rekening', 'value' => $info->bank_account_number ?? '-'],
-                                ['label' => 'Bank', 'value' => $info->bank_name ?? '-'],
-                                ['label' => 'Telepon', 'value' => $info->phone ?? '-'],
-                                ['label' => 'Email', 'value' => Str::limit($info->email ?? '-', 20)],
-                            ] as $item)
-                            <div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.06)">
-                                <p class="text-xs mb-1" style="color: rgba(255,255,255,0.45)">{{ $item['label'] }}</p>
-                                <p class="text-sm font-medium text-white font-mono">{{ $item['value'] }}</p>
-                            </div>
-                            @endforeach
-                        </div>
-
-                        <!-- Gold line accent -->
-                        <div class="mt-8 h-0.5 rounded-full opacity-30" style="background: linear-gradient(90deg, var(--gold), transparent)"></div>
-                        <p class="text-xs mt-3" style="color: rgba(255,255,255,0.35)">
-                            {{ $info->address ?? 'Jl. Cempaka Indah, Bandung' }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Floating badge -->
-                <div class="absolute -bottom-5 -right-5 rounded-2xl p-4 shadow-xl"
-                     style="background: var(--gold); min-width: 130px">
-                    <p class="text-xs font-medium text-white/70">Berdiri sejak</p>
-                    <p class="text-2xl font-bold text-white font-mono">2010</p>
-                    <p class="text-xs text-white/60">Melayani anggota</p>
+                <div class="relative overflow-hidden shadow-2xl">
+                    <img src="{{ asset('images/profil-koperasi.jpeg') }}" alt="Profil Koperasi Cempaka" class="w-full h-auto object-contain">
                 </div>
             </div>
 
             <!-- Right: Text content -->
-            <div class="reveal-right space-y-6">
+            <div class="reveal-right space-y-6 flex flex-col justify-center h-full">
                 <span class="section-tag">Profil Koperasi</span>
 
                 <h2 class="text-4xl font-display font-bold leading-tight" style="color: var(--text)">
@@ -463,25 +342,6 @@
                 <p class="text-base leading-relaxed" style="color: var(--text-muted)">
                     {{ $info->name }} hadir sebagai mitra keuangan terpercaya bagi anggota. Dengan sistem yang modern dan pengurus yang berpengalaman, kami memastikan setiap transaksi berjalan dengan aman dan transparan.
                 </p>
-
-                <div class="space-y-4">
-                    @foreach([
-                        ['icon' => '🏆', 'title' => 'Terakreditasi & Terpercaya', 'desc' => 'Beroperasi secara legal dengan pengawasan penuh sesuai regulasi koperasi Indonesia'],
-                        ['icon' => '🔒', 'title' => 'Keamanan Barang Terjamin', 'desc' => 'Barang gadai tersimpan di gudang aman dengan monitoring 24 jam'],
-                        ['icon' => '💡', 'title' => 'Teknologi Digital Modern', 'desc' => 'Kelola gadai dan simpanan dari mana saja melalui platform MONY'],
-                    ] as $item)
-                    <div class="reveal flex items-start gap-4 p-4 rounded-2xl transition-all duration-200"
-                         style="background: var(--green-light)"
-                         onmouseover="this.style.background='var(--cream)'; this.style.boxShadow='0 4px 16px rgba(26,61,46,0.08)'"
-                         onmouseout="this.style.background='var(--green-light)'; this.style.boxShadow='none'">
-                        <span class="text-2xl flex-shrink-0">{{ $item['icon'] }}</span>
-                        <div>
-                            <p class="font-semibold text-sm" style="color: var(--green)">{{ $item['title'] }}</p>
-                            <p class="text-sm mt-0.5" style="color: var(--text-muted)">{{ $item['desc'] }}</p>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
             </div>
         </div>
     </div>
@@ -512,20 +372,10 @@
                      style="background: var(--gold)"></div>
 
                 <div class="relative">
-                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-6"
-                         style="background: rgba(201,168,76,0.15)">
-                        <svg class="w-7 h-7" style="color: var(--gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
-                    </div>
-
-                    <h3 class="text-2xl font-display font-bold text-white mb-4">Visi</h3>
+                    <h3 class="text-3xl font-display font-bold text-white mb-4">Visi</h3>
                     <div class="w-12 h-0.5 rounded mb-6" style="background: var(--gold)"></div>
 
-                    <p class="text-base leading-relaxed" style="color: rgba(255,255,255,0.8)">
+                    <p class="text-lg leading-relaxed" style="color: rgba(255,255,255,0.8)">
                         {{ $info->vision ?? 'Menjadi koperasi simpan pinjam yang terpercaya, profesional, dan memberikan manfaat nyata bagi seluruh anggota dalam mewujudkan kesejahteraan bersama.' }}
                     </p>
                 </div>
@@ -533,29 +383,21 @@
 
             <!-- Misi -->
             <div class="reveal delay-200 rounded-3xl p-10 border" style="background: var(--cream-white); border-color: rgba(26,61,46,0.1)">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-6"
-                     style="background: var(--green-light)">
-                    <svg class="w-7 h-7" style="color: var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                    </svg>
-                </div>
-
-                <h3 class="text-2xl font-display font-bold mb-4" style="color: var(--green)">Misi</h3>
+                <h3 class="text-3xl font-display font-bold mb-4" style="color: var(--green)">Misi</h3>
                 <div class="w-12 h-0.5 rounded mb-6" style="background: var(--gold)"></div>
 
                 @php
                     $misiLines = $info->mission
                         ? array_filter(array_map('trim', preg_split('/[\n\r]+/', $info->mission)))
-                        : ['Memberikan layanan simpan pinjam yang mudah dan terjangkau', 'Meningkatkan kesejahteraan anggota melalui pengelolaan keuangan yang baik', 'Menjalankan usaha gadai dengan transparan dan adil', 'Mendistribusikan SHU secara merata kepada seluruh anggota aktif'];
+                        : ['Memberikan layanan simpan pinjam yang mudah dan terjangkau', 'Meningkatkan kesejahteraan anggota melalui pengelolaan keuangan yang baik', 'Menjalankan usaha gadai dengan transparan dan adil'];
                 @endphp
 
-                <ul class="space-y-4">
+                <ul class="space-y-5">
                     @foreach(array_values($misiLines) as $i => $line)
-                    <li class="flex items-start gap-3">
-                        <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
+                    <li class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white flex-shrink-0 mt-0.5"
                               style="background: var(--green)">{{ $i + 1 }}</span>
-                        <p class="text-sm leading-relaxed" style="color: var(--text-muted)">
+                        <p class="text-base leading-relaxed" style="color: var(--text-muted)">
                             {{ preg_replace('/^\d+\.\s*/', '', $line) }}
                         </p>
                     </li>
@@ -593,16 +435,9 @@
                 [
                     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>',
                     'title' => 'Simpanan Anggota',
-                    'desc' => 'Tabung secara rutin dengan simpanan pokok dan wajib bulanan. Aman dan terkelola dengan baik.',
+                    'desc' => 'Bayar simpanan wajib di awal sebagai anggota resmi, lalu tabung simpanan pokok secara rutin setiap bulan. Aman dan terkelola dengan baik.',
                     'tag' => 'Bulanan',
                     'color' => '#1E40AF',
-                ],
-                [
-                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>',
-                    'title' => 'Bagi Hasil SHU',
-                    'desc' => 'Nikmati Sisa Hasil Usaha (SHU) tahunan berdasarkan proporsi simpanan dan aktivitas gadai Anda.',
-                    'tag' => 'Tahunan',
-                    'color' => 'var(--gold-dark)',
                 ],
                 [
                     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>',
@@ -666,7 +501,7 @@
                 <div class="rounded-2xl p-6" style="background: var(--green-light); border: 1px solid rgba(26,61,46,0.1)">
                     <p class="text-sm font-semibold mb-3" style="color: var(--green)">Keunggulan Gadai MONY</p>
                     <ul class="space-y-2 text-sm" style="color: var(--text-muted)">
-                        @foreach(['Penilaian barang langsung oleh penaksir berpengalaman', 'Bunga tetap 8% per bulan, tidak ada biaya tersembunyi', 'Tenor hingga 4 bulan, bisa diperpanjang', 'Barang aman tersimpan di gudang ber-AC & berkeamanan', 'Pelunasan bisa dilakukan kapan saja'] as $item)
+                        @foreach(['Penilaian barang langsung oleh penaksir berpengalaman', 'Bunga tetap 8% per bulan, tidak ada biaya tersembunyi', 'Jatuh tempo otomatis diperpanjang setiap bunga dibayar', 'Barang aman tersimpan di gudang ber-AC & berkeamanan', 'Pelunasan bisa dilakukan kapan saja'] as $item)
                         <li class="flex items-start gap-2">
                             <svg class="w-4 h-4 mt-0.5 flex-shrink-0" style="color: var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -734,72 +569,319 @@
             </p>
         </div>
 
+        @php
+            $catalogMeta = [
+                'Laptop' => [
+                    'photo' => 'laptop.jpg',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Lenovo', 'Asus', 'Acer', 'Apple', 'HP', 'Axioo'],
+                    'conditions' => [
+                        ['title' => 'Dapat Menyala Normal', 'desc' => 'Laptop dapat hidup, masuk sistem, dan digunakan.'],
+                        ['title' => 'Layar Normal', 'desc' => 'Tidak pecah, tidak blank, dan tidak bergaris berat.'],
+                        ['title' => 'Body Normal', 'desc' => 'Tidak rusak parah, engsel masih baik, dan keyboard masih berfungsi.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit Laptop', 'desc' => 'Laptop harus dibawa dalam kondisi utuh.'],
+                        ['title' => 'Kartu Garansi', 'desc' => 'Lampirkan jika masih terdapat nota pembelian.'],
+                        ['title' => 'Charger Original', 'desc' => 'Charger wajib tersedia agar dapat dilakukan pengecekan.'],
+                    ],
+                ],
+                'Smartphone' => [
+                    'photo' => 'handphone.jpg',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['iPhone', 'Samsung', 'Oppo', 'Vivo', 'Xiaomi', 'Realme'],
+                    'conditions' => [
+                        ['title' => 'Dapat Menyala Normal', 'desc' => 'Ponsel dapat dinyalakan dan digunakan tanpa kendala apapun.'],
+                        ['title' => 'Layar Normal', 'desc' => 'Tidak pecah parah, touch screen masih berfungsi, dan tampilan jelas.'],
+                        ['title' => 'Bukan Barang Rusak Berat', 'desc' => 'HP tidak mati total dan tidak terkunci permanen.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit HP', 'desc' => 'HP harus dibawa dalam kondisi utuh dan tidak rusak.'],
+                        ['title' => 'Nota Pembelian', 'desc' => 'Lampirkan jika masa garansi resmi masih berlaku.'],
+                        ['title' => 'Charger Original', 'desc' => 'Jika ada charger asli, nilai barang bisa lebih baik.'],
+                    ],
+                ],
+                'TV' => [
+                    'photo' => 'television.jpg',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Samsung', 'LG', 'Sharp', 'Polytron', 'Toshiba', 'Sony'],
+                    'conditions' => [
+                        ['title' => 'Layar Normal', 'desc' => 'Tidak pecah, tidak bergaris, dan tampilan masih jelas.'],
+                        ['title' => 'Audio Berfungsi', 'desc' => 'Audio keluar normal tanpa suara pecah atau gangguan berat.'],
+                        ['title' => 'Unit Menyala dengan Baik', 'desc' => 'TV dapat dioperasikan dan merespons tombol maupun remote.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit TV', 'desc' => 'TV wajib dibawa dalam kondisi utuh.'],
+                        ['title' => 'Remote', 'desc' => 'Remote asli atau yang masih kompatibel akan menambah nilai.'],
+                        ['title' => 'Kabel Listrik', 'desc' => 'Wajib tersedia agar petugas dapat melakukan pengecekan langsung.'],
+                    ],
+                ],
+                'Kulkas' => [
+                    'photo' => 'kulkas.webp',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Samsung', 'LG', 'Sharp', 'Polytron', 'Panasonic', 'Aqua'],
+                    'conditions' => [
+                        ['title' => 'Mesin Berfungsi Normal', 'desc' => 'Kulkas dapat menyala, mendinginkan dengan baik, dan tidak mengeluarkan suara mesin berlebih.'],
+                        ['title' => 'Fungsi Normal', 'desc' => 'Tidak ada kerusakan besar seperti pintu rusak, body penyok parah, atau bagian dalam pecah.'],
+                        ['title' => 'Tidak Bocor', 'desc' => 'Tidak ada kebocoran air atau kerusakan pendingin yang mengganggu fungsi utama.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit Kulkas', 'desc' => 'Barang utama dalam kondisi utuh.'],
+                        ['title' => 'Rak Bagian Dalam', 'desc' => 'Rak, laci, dan kompartemen sebaiknya lengkap.'],
+                        ['title' => 'Kabel Listrik', 'desc' => 'Kabel listrik wajib dalam kondisi aman dan layak pakai.'],
+                    ],
+                ],
+                'Rice Cooker' => [
+                    'photo' => 'rice-cooker.png',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Philips', 'Miyako', 'Cosmos', 'Maspion', 'Panasonic', 'Yong Ma'],
+                    'conditions' => [
+                        ['title' => 'Fisik Mulus & Terawat', 'desc' => 'Tidak ada retakan, pecah, atau penyok pada bodi luar dan dalam panci.'],
+                        ['title' => 'Fungsi Normal', 'desc' => 'Mode Cook & Warm bekerja sempurna tanpa kendala teknis.'],
+                        ['title' => 'Kabel Asli', 'desc' => 'Kabel daya original, tidak terkelupas, dan tidak ada sambungan manual.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Dus/Kotak Asli', 'desc' => 'Opsional, namun menambah nilai taksiran pinjaman.'],
+                        ['title' => 'Kartu Garansi', 'desc' => 'Lampirkan jika masa garansi resmi masih berlaku.'],
+                        ['title' => 'Aksesoris Original', 'desc' => 'Centong nasi dan wadah kukusan asli bawaan unit.'],
+                    ],
+                ],
+                'Kompor' => [
+                    'photo' => 'kompor.jpg',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Rinnai', 'Quantum', 'Miyako', 'Modena', 'Compos', 'Winn Gas'],
+                    'conditions' => [
+                        ['title' => 'Fisik Mulus & Terawat', 'desc' => 'Tidak ada kerusakan besar pada bodi, tungku, atau permukaan kompor.'],
+                        ['title' => 'Api Normal', 'desc' => 'Kompor dapat menyala dengan baik dan menghasilkan api yang stabil.'],
+                        ['title' => 'Tidak Bocor', 'desc' => 'Tidak ada indikasi kebocoran gas pada saluran atau sambungan utama.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit Kompor', 'desc' => 'Kompor harus dibawa dalam kondisi utuh.'],
+                        ['title' => 'Tungku Lengkap', 'desc' => 'Bagian tatakan dan komponen atas harus tersedia.'],
+                        ['title' => 'Selang dan Regulator', 'desc' => 'Jika tersedia, akan menambah nilai taksiran.'],
+                    ],
+                ],
+                'Kipas' => [
+                    'photo' => 'kipas.jpeg',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Nagoya', 'Miyako', 'Cosmos', 'Maspion', 'Panasonic', 'Sekai'],
+                    'conditions' => [
+                        ['title' => 'Fisik Utuh', 'desc' => 'Baling-baling, pelindung, dan badan kipas masih lengkap.'],
+                        ['title' => 'Fungsi Normal', 'desc' => 'Kipas dapat berputar dengan baik tanpa gangguan.'],
+                        ['title' => 'Tidak Berisik Berlebihan', 'desc' => 'Suara mesin masih aman dan tidak menandakan kerusakan berat.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit Kipas', 'desc' => 'Kipas harus dibawa dalam kondisi utuh.'],
+                        ['title' => 'Penyangga atau Stand', 'desc' => 'Untuk kipas berdiri, bagian kaki atau dudukan harus lengkap.'],
+                        ['title' => 'Kabel Listrik', 'desc' => 'Kabel harus aman, tidak putus, dan tidak disambung manual.'],
+                    ],
+                ],
+                'Emas' => [
+                    'photo' => 'perhiasan.jpg',
+                    'brand_label' => 'Jenis yang Diterima',
+                    'brands' => ['Liontin', 'Cincin', 'Gelang', 'Kalung', 'Anting'],
+                    'conditions' => [
+                        ['title' => 'Emas Asli', 'desc' => 'Perhiasan harus merupakan emas asli dan dapat diverifikasi.'],
+                        ['title' => 'Tidak Rusak Parah', 'desc' => 'Tidak patah, tidak berlubang parah, dan masih dalam bentuk layak.'],
+                        ['title' => 'Layak Dinilai', 'desc' => 'Barang dapat ditimbang dan diperiksa kadar emasnya.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Perhiasan', 'desc' => 'Barang wajib dibawa langsung untuk pengecekan fisik.'],
+                        ['title' => 'Sertifikat atau Nota', 'desc' => 'Jika ada, dapat membantu proses verifikasi dan penilaian.'],
+                    ],
+                ],
+                'Motor' => [
+                    'photo' => 'motor.webp',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Beat', 'Vario', 'Scoopy', 'Supra', 'Vixion', 'Jupiter'],
+                    'conditions' => [
+                        ['title' => 'Mesin Normal', 'desc' => 'Motor dapat dinyalakan dan digunakan dengan baik.'],
+                        ['title' => 'Fisik Layak', 'desc' => 'Body masih baik, tidak rusak berat, dan kendaraan dalam kondisi layak.'],
+                        ['title' => 'Nomor Rangka dan Mesin Jelas', 'desc' => 'Data kendaraan harus dapat diperiksa dengan baik.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit Motor', 'desc' => 'Barang wajib dibawa langsung untuk pengecekan fisik.'],
+                        ['title' => 'STNK dan BPKB', 'desc' => 'Wajib tersedia sebagai bukti legal kendaraan.'],
+                        ['title' => 'Kunci Asli', 'desc' => 'Minimal tersedia kunci utama kendaraan.'],
+                    ],
+                ],
+                'Sepeda' => [
+                    'photo' => 'sepeda.jpg',
+                    'brand_label' => 'Merk yang Diterima',
+                    'brands' => ['Polygon', 'United', 'Wamcycle', 'Pacific', 'Exotic'],
+                    'conditions' => [
+                        ['title' => 'Rangka Kokoh', 'desc' => 'Tidak bengkok, retak, keropos, maupun rusak berat.'],
+                        ['title' => 'Ban dan Rem Layak', 'desc' => 'Masih dapat digunakan dan mendukung fungsi utama sepeda.'],
+                        ['title' => 'Fisik Masih Baik', 'desc' => 'Kondisi umum masih layak pakai dan tidak rusak berat.'],
+                    ],
+                    'kelengkapan' => [
+                        ['title' => 'Unit Sepeda', 'desc' => 'Sepeda harus dibawa dalam kondisi utuh.'],
+                        ['title' => 'Nota Pembelian', 'desc' => 'Jika ada, dapat membantu verifikasi kepemilikan.'],
+                        ['title' => 'Komponen Sepeda Lengkap', 'desc' => 'Ban, velg, dan komponen utama masih tersedia.'],
+                    ],
+                ],
+            ];
+            $catalogNotes = [
+                'Barang Anda akan dibersihkan secara profesional dan disimpan dalam gudang yang aman, kering, dan berventilasi baik.',
+                'Taksiran nilai didasarkan pada algoritma harga pasar bekas terkini untuk memastikan Anda mendapat harga tertinggi.',
+            ];
+        @endphp
+
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             @foreach($katalog as $i => $item)
-            <div class="reveal group cursor-pointer rounded-2xl p-5 text-center border transition-all duration-300"
-                 style="background: white; border-color: rgba(26,61,46,0.08); transition-delay: {{ ($i % 5) * 60 }}ms"
-                 onmouseover="this.style.borderColor='var(--green)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 28px rgba(26,61,46,0.12)'"
-                 onmouseout="this.style.borderColor='rgba(26,61,46,0.08)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            @php
+                $meta = null;
+                foreach($catalogMeta as $key => $data) {
+                    if(str_contains($item->name, $key)) { $meta = $data; break; }
+                }
+                $photoUrl = $item->image_path
+                    ? asset('storage/' . $item->image_path)
+                    : (($meta['photo'] ?? null) ? asset('images/' . $meta['photo']) : null);
+            @endphp
+            <div x-data="{ open: false }">
 
-                <!-- Icon / Image -->
-                <div class="w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center overflow-hidden transition-all duration-300"
-                     style="background: var(--green-light)">
-                    @if($item->image_path)
-                        <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->name }}"
-                             class="w-full h-full object-cover">
+                <!-- Card -->
+                <div @click="open = true"
+                     class="reveal group cursor-pointer rounded-2xl overflow-hidden relative h-56 text-center border transition-all duration-300"
+                     style="border-color: rgba(26,61,46,0.08); transition-delay: {{ ($i % 5) * 60 }}ms"
+                     onmouseover="this.style.borderColor='var(--green)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 28px rgba(26,61,46,0.12)'"
+                     onmouseout="this.style.borderColor='rgba(26,61,46,0.08)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+
+                    <!-- Background photo -->
+                    @if($photoUrl)
+                        <img src="{{ $photoUrl }}" alt="{{ $item->name }}"
+                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                     @else
-                        @php
-                            $icons = [
-                                'Laptop' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-                                'Smartphone' => 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z',
-                                'TV' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-                                'Motor' => 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193',
-                                'Emas' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-                                'default' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
-                            ];
-                            $iconPath = $icons['default'];
-                            foreach($icons as $key => $path) {
-                                if(str_contains($item->name, $key)) { $iconPath = $path; break; }
-                            }
-                        @endphp
-                        <svg class="w-8 h-8 transition-colors" style="color: var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $iconPath }}"/>
-                        </svg>
+                        <div class="absolute inset-0" style="background: var(--green-light)"></div>
                     @endif
+
+                    <!-- Gradient overlay for legible text -->
+                    <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(15,35,25,0.88), rgba(15,35,25,0.25) 55%, rgba(15,35,25,0.05))"></div>
+
+                    <!-- Content -->
+                    <div class="relative h-full flex flex-col justify-end p-5">
+                        <p class="font-semibold text-sm leading-tight mb-1 text-white">{{ $item->name }}</p>
+                        <p class="text-xs mb-2" style="color: rgba(255,255,255,0.75)">{{ $item->category }}</p>
+
+                        <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mx-auto"
+                             style="background: var(--gold-light); color: var(--gold-dark)">
+                            Max {{ $item->max_loan_percentage }}%
+                        </div>
+                    </div>
                 </div>
 
-                <p class="font-semibold text-sm leading-tight mb-1" style="color: var(--text)">{{ $item->name }}</p>
-                <p class="text-xs mb-2" style="color: var(--text-muted)">{{ $item->category }}</p>
+                <!-- Detail Modal -->
+                <div x-show="open" x-cloak
+                     x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     @click.self="open = false" @keydown.escape.window="open = false"
+                     class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(15,35,25,0.6)">
+                    <div @click.stop
+                         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                         class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl text-left" style="background: var(--cream-white)">
 
-                <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                     style="background: var(--gold-light); color: var(--gold-dark)">
-                    Max {{ $item->max_loan_percentage }}%
+                        <!-- Close button -->
+                        <button @click="open = false"
+                                class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+                                style="background: rgba(255,255,255,0.9); color: var(--text)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+
+                        <!-- Header photo -->
+                        <div class="relative aspect-[4/3]">
+                            @if($photoUrl)
+                                <img src="{{ $photoUrl }}" alt="{{ $item->name }}" class="absolute inset-0 w-full h-full object-cover">
+                            @else
+                                <div class="absolute inset-0" style="background: var(--green-light)"></div>
+                            @endif
+                            <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(15,35,25,0.55), transparent 60%)"></div>
+                        </div>
+
+                        <div class="p-6 space-y-6">
+                            <div>
+                                <h3 class="text-2xl font-display font-bold" style="color: var(--text)">{{ $item->name }}</h3>
+                                <p class="text-sm mt-1" style="color: var(--text-muted)">{{ $item->category }} &middot; Maksimal pinjaman {{ $item->max_loan_percentage }}%</p>
+                            </div>
+
+                            @if($meta)
+                                <!-- Kondisi Barang -->
+                                <div>
+                                    <h4 class="font-display font-bold text-base mb-3" style="color: var(--green)">Kondisi Barang yang Diterima</h4>
+                                    <div class="space-y-3">
+                                        @foreach($meta['conditions'] as $cond)
+                                        <div class="flex items-start gap-3">
+                                            <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background: var(--green-light)">
+                                                <svg class="w-3.5 h-3.5" style="color: var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </span>
+                                            <div>
+                                                <p class="font-semibold text-sm" style="color: var(--text)">{{ $cond['title'] }}</p>
+                                                <p class="text-sm leading-relaxed" style="color: var(--text-muted)">{{ $cond['desc'] }}</p>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- Merk / Jenis -->
+                                <div>
+                                    <h4 class="font-display font-bold text-base mb-3" style="color: var(--green)">{{ $meta['brand_label'] }}</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($meta['brands'] as $brand)
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: var(--green-light); color: var(--green)">{{ $brand }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- Kelengkapan Wajib -->
+                                <div>
+                                    <h4 class="font-display font-bold text-base mb-3" style="color: var(--green)">Kelengkapan Wajib</h4>
+                                    <div class="space-y-3">
+                                        @foreach($meta['kelengkapan'] as $req)
+                                        <div class="flex items-start gap-3">
+                                            <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(201,168,76,0.15)">
+                                                <svg class="w-3.5 h-3.5" style="color: var(--gold-dark)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </span>
+                                            <div>
+                                                <p class="font-semibold text-sm" style="color: var(--text)">{{ $req['title'] }}</p>
+                                                <p class="text-sm leading-relaxed" style="color: var(--text-muted)">{{ $req['desc'] }}</p>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Notes -->
+                            <div class="space-y-2">
+                                @foreach($catalogNotes as $note)
+                                <div class="flex items-start gap-3 rounded-xl p-3" style="background: rgba(26,61,46,0.05)">
+                                    <svg class="w-4 h-4 mt-0.5 flex-shrink-0" style="color: var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <p class="text-xs leading-relaxed" style="color: var(--text-muted)">{{ $note }}</p>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <a href="{{ route('login') }}"
+                               class="block text-center w-full px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                               style="background: var(--gold)"
+                               onmouseover="this.style.background='var(--gold-dark)'"
+                               onmouseout="this.style.background='var(--gold)'">
+                                Coba Simulasi Gadai
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
             @endforeach
-        </div>
-
-        <!-- Info footnote -->
-        <div class="mt-10 reveal rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-             style="background: var(--green-light); border: 1px solid rgba(26,61,46,0.1)">
-            <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 mt-0.5 flex-shrink-0" style="color: var(--green)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <p class="text-sm" style="color: var(--green)">
-                    Nilai pinjaman maksimal <strong>80–85%</strong> dari nilai taksir. Kondisi, merek, dan tahun produksi mempengaruhi nilai taksiran akhir.
-                </p>
-            </div>
-            <a href="{{ route('login') }}"
-               class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-               style="background: var(--green)"
-               onmouseover="this.style.background='var(--green2)'"
-               onmouseout="this.style.background='var(--green)'">
-                Cek Taksiran Sekarang
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                </svg>
-            </a>
         </div>
     </div>
 </section>
@@ -822,7 +904,7 @@
             @foreach([
                 ['num' => '01', 'title' => 'Transparan & Jujur', 'desc' => 'Semua biaya sudah jelas di awal. Tidak ada bunga tersembunyi atau pemotongan sepihak. Anda tahu persis berapa yang harus dibayar.'],
                 ['num' => '02', 'title' => 'Proses Digital 100%', 'desc' => 'Dari pendaftaran hingga pembayaran, semua dilakukan secara digital. Pantau status gadai real-time dari mana saja.'],
-                ['num' => '03', 'title' => 'Anggota Adalah Pemilik', 'desc' => 'Sebagai anggota koperasi, Anda ikut memiliki dan mendapatkan Sisa Hasil Usaha (SHU) setiap tahun sesuai kontribusi Anda.'],
+                ['num' => '03', 'title' => 'Anggota Adalah Pemilik', 'desc' => 'Sebagai anggota koperasi, Anda turut memiliki suara dan kepentingan dalam setiap layanan yang dikelola untuk kesejahteraan bersama.'],
             ] as $i => $item)
             <div class="reveal rounded-3xl p-8 transition-all duration-300"
                  style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition-delay: {{ $i * 100 }}ms"
@@ -843,7 +925,7 @@
             @foreach([
                 ['text' => '"Proses gadai di MONY sangat mudah. Upload foto barang, tunggu konfirmasi, dan dana langsung cair. Recommended!"', 'name' => 'Sari W.', 'role' => 'Anggota sejak 2021'],
                 ['text' => '"Bunganya kompetitif dan tidak ada biaya tersembunyi. Pengurus sangat responsif dan komunikatif."', 'name' => 'Dedi K.', 'role' => 'Anggota sejak 2020'],
-                ['text' => '"SHU yang saya terima setiap tahun lumayan. Selain gadai, saya juga rutin menabung simpanan wajib."', 'name' => 'Rina S.', 'role' => 'Anggota sejak 2022'],
+                ['text' => '"Simpanan wajib dan pokok saya tercatat rapi, bisa dipantau langsung dari aplikasi. Selain gadai, jadi lebih disiplin menabung."', 'name' => 'Rina S.', 'role' => 'Anggota sejak 2022'],
             ] as $t)
             <div class="reveal rounded-2xl p-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08)">
                 <svg class="w-6 h-6 mb-4 opacity-40" style="color: var(--gold)" fill="currentColor" viewBox="0 0 24 24">
@@ -929,12 +1011,7 @@
             <!-- Brand -->
             <div class="sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center gap-3 mb-5">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: rgba(201,168,76,0.2)">
-                        <svg class="w-5 h-5" style="color: var(--gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
+                    <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY" class="w-9 h-9 rounded-xl object-contain">
                     <span class="font-display font-bold text-xl text-white">MONY</span>
                 </div>
                 <p class="text-sm leading-relaxed mb-5" style="color: rgba(255,255,255,0.5)">
@@ -959,7 +1036,7 @@
             <div>
                 <p class="font-semibold text-white mb-5">Layanan</p>
                 <ul class="space-y-3">
-                    @foreach(['Gadai Barang' => '#barang', 'Simpanan Anggota' => '#layanan', 'Simulasi Gadai' => route('login'), 'SHU Tahunan' => '#layanan', 'Konsultasi' => '#layanan'] as $label => $href)
+                    @foreach(['Gadai Barang' => '#barang', 'Simpanan Anggota' => '#layanan', 'Simulasi Gadai' => route('login'), 'Konsultasi' => '#layanan'] as $label => $href)
                     <li>
                         <a href="{{ $href }}" class="text-sm transition-colors"
                            style="color: rgba(255,255,255,0.5)"

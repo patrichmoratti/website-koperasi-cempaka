@@ -22,6 +22,41 @@ window.showToast = function(message, type = 'success', duration = 3500) {
     setTimeout(() => { div.style.opacity = '0'; div.style.transition = 'opacity .3s'; setTimeout(() => div.remove(), 300); }, duration);
 };
 
+// Global confirm-dialog helper — replaces native browser confirm() with the
+// app's own small popup (listened to by partials.confirm-modal in each layout).
+// Usage: onclick="return confirmAction(event, 'Pesan konfirmasi?')"
+//        onsubmit="return confirmAction(event, 'Pesan konfirmasi?')"
+window.confirmAction = function(event, message, confirmLabel = 'Ya, Lanjutkan') {
+    const form = event.target.tagName === 'FORM' ? event.target : event.target.closest('form');
+    if (!form) return true;
+    if (form.dataset.confirmed === '1') {
+        delete form.dataset.confirmed;
+        return true;
+    }
+    event.preventDefault();
+    window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+        detail: {
+            message,
+            confirmLabel,
+            onConfirm: () => {
+                form.dataset.confirmed = '1';
+                if (form.requestSubmit) form.requestSubmit();
+                else form.submit();
+            },
+        },
+    }));
+    return false;
+};
+
+// Global reject-reason popup helper — replaces inline "Tolak" textarea panels
+// with the app's own small popup (listened to by partials.reject-modal).
+// Usage: onclick="openRejectModal('Alasan penolakan untuk Budi', '/admin/konfirmasi/registrasi/1/reject')"
+window.openRejectModal = function(message, actionUrl) {
+    window.dispatchEvent(new CustomEvent('open-reject-modal', {
+        detail: { message, actionUrl },
+    }));
+};
+
 // Global currency formatter
 window.formatRupiah = function(amount) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -39,4 +74,5 @@ Chart.defaults.plugins.tooltip.callbacks.label = function(context) {
     return context.formattedValue;
 };
 
+Alpine.store('lb', { show: false, src: '', type: '' });
 Alpine.start();

@@ -28,6 +28,10 @@
 
 /* ── Base ──────────────────────────────────────────────── */
 @layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
     html {
         font-family: 'DM Sans', sans-serif;
         scroll-behavior: smooth;
@@ -344,4 +348,144 @@
         background-clip: text;
     }
     .text-balance { text-wrap: balance; }
+
+    /* ── Dashboard layout (green background) overrides ── */
+    /* Re-scope CSS variables so ALL var(--text) and var(--text-muted)
+       references in <main> resolve to light/white tones on the dark bg,
+       then revert back to dark inside white cards. */
+    .app-layout main {
+        --text:       rgba(255, 255, 255, 0.92);
+        --text-muted: rgba(255, 255, 255, 0.55);
+    }
+    .app-layout main .card,
+    .app-layout main .card * {
+        --text:       #1C1C1A;
+        --text-muted: #6B7280;
+    }
+    /* Ghost/back buttons in main on green bg → white-tinted */
+    .app-layout main .btn-ghost {
+        color: rgba(255, 255, 255, 0.75);
+    }
+    .app-layout main .btn-ghost:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+    .app-layout main .card .btn-ghost {
+        color: #4B5563;
+    }
+    .app-layout main .card .btn-ghost:hover {
+        background-color: #F3F4F6;
+        color: #374151;
+    }
+    /* Table hover rows — use white-tinted on dark bg, revert inside cards */
+    .app-layout main .table-base tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
+    .app-layout main .card .table-base tbody tr:hover {
+        background-color: var(--cream);
+    }
+}
+
+/* ── Unlayered overrides (beat @layer utilities Tailwind classes) ─────────
+   Override Tailwind text-color utilities for elements directly on the
+   dark-green body inside dashboard layouts. Revert to dark inside cards. */
+.app-layout main .text-mony-text { color: white; }
+.app-layout main .text-mony-muted { color: rgba(255, 255, 255, 0.6); }
+.app-layout main .text-gray-700,
+.app-layout main .text-gray-600,
+.app-layout main .text-gray-500 { color: rgba(255, 255, 255, 0.6); }
+.app-layout main .text-gray-900,
+.app-layout main .text-gray-800 { color: white; }
+
+/* Revert inside white cards */
+.app-layout main .card .text-mony-text { color: #1C1C1A; }
+.app-layout main .card .text-mony-muted { color: #6B7280; }
+.app-layout main .card .text-gray-700,
+.app-layout main .card .text-gray-600,
+.app-layout main .card .text-gray-500 { color: #6B7280; }
+.app-layout main .card .text-gray-900,
+.app-layout main .card .text-gray-800 { color: #111827; }
+
+/* ── Button visibility on dark green background ──────────────────────────
+   btn-primary (green bg) is invisible on green page → white bg + green text.
+   btn-outline (white bg, text-gray-700) gets text overridden above → fix back.
+   Both revert inside .card to their original styles. */
+.app-layout main .btn-primary {
+    background-color: white;
+    color: var(--green);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.app-layout main .btn-primary:hover {
+    background-color: var(--green-light);
+    color: var(--green);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+.app-layout main .card .btn-primary {
+    background-color: var(--green);
+    color: white;
+    box-shadow: none;
+}
+.app-layout main .card .btn-primary:hover {
+    background-color: var(--green2);
+    color: white;
+}
+/* btn-outline on dark bg: semi-transparent white outline */
+.app-layout main .btn-outline {
+    background-color: transparent;
+    color: rgba(255,255,255,0.85);
+    border-color: rgba(255,255,255,0.35);
+}
+.app-layout main .btn-outline:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.65);
+}
+.app-layout main .card .btn-outline {
+    background-color: white;
+    color: #374151;
+    border-color: #D1D5DB;
+}
+.app-layout main .card .btn-outline:hover {
+    background-color: #F9FAFB;
+    color: #111827;
+    border-color: #9CA3AF;
+}
+
+/* ── White popup/sheet containers — revert ALL color overrides ───────────
+   Popup sheets use bg-white but are NOT .card, so the main-area overrides
+   (white text) apply inside them causing invisible text on white backgrounds.
+   These rules restore correct dark-text behaviour inside any bg-white element. */
+.app-layout .popup-sheet {
+    --text:       #1C1C1A;
+    --text-muted: #6B7280;
+}
+.app-layout .popup-sheet .text-mony-text  { color: #1C1C1A; }
+.app-layout .popup-sheet .text-mony-muted { color: #6B7280; }
+.app-layout .popup-sheet .text-gray-900,
+.app-layout .popup-sheet .text-gray-800   { color: #111827; }
+.app-layout .popup-sheet .text-gray-700,
+.app-layout .popup-sheet .text-gray-600   { color: #374151; }
+.app-layout .popup-sheet .text-gray-500   { color: #6B7280; }
+/* btn-primary inside popup: standard green */
+.app-layout .popup-sheet .btn-primary {
+    background-color: var(--green);
+    color: white;
+    box-shadow: none;
+}
+.app-layout .popup-sheet .btn-primary:hover {
+    background-color: var(--green2);
+    color: white;
+    transform: translateY(-1px);
+}
+/* btn-outline inside popup: standard white */
+.app-layout .popup-sheet .btn-outline {
+    background-color: white;
+    color: #374151;
+    border-color: #D1D5DB;
+}
+.app-layout .popup-sheet .btn-outline:hover {
+    background-color: #F9FAFB;
+    color: #111827;
+    border-color: #9CA3AF;
 }

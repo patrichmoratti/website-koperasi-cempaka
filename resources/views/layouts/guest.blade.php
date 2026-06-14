@@ -23,12 +23,7 @@
 
         {{-- Top: Logo --}}
         <div class="relative flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: rgba(201,168,76,0.2)">
-                <svg class="w-5 h-5" style="color: var(--gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
+            <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY" class="w-9 h-9 rounded-xl object-contain">
             <div>
                 <span class="font-display font-bold text-xl text-white">MONY</span>
                 <p class="text-xs" style="color: rgba(255,255,255,0.4)">KSP Cempaka</p>
@@ -47,7 +42,7 @@
             </p>
 
             <div class="space-y-3">
-                @foreach(['Taksiran hingga 85% nilai barang', 'Bunga tetap 8% per bulan', 'Notifikasi otomatis & real-time', 'SHU dibagikan setiap tahun'] as $item)
+                @foreach(['Taksiran hingga 85% nilai barang', 'Bunga tetap 8% per bulan', 'Notifikasi otomatis & real-time', 'Simpanan anggota terkelola rapi'] as $item)
                 <div class="flex items-center gap-3">
                     <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
                          style="background: rgba(201,168,76,0.2)">
@@ -90,12 +85,7 @@
                 Beranda
             </a>
             <div class="flex items-center justify-center gap-3">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--green)">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
+                <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY" class="w-9 h-9 rounded-xl object-contain">
                 <div class="text-left">
                     <p class="font-display font-bold text-xl" style="color: var(--green)">MONY</p>
                     <p class="text-xs" style="color: var(--text-muted)">KSP Cempaka</p>
