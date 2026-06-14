@@ -9,13 +9,18 @@ use App\Models\User;
 use App\Models\PengajuanGadai;
 use App\Services\GadaiService;
 use App\Services\NotifikasiService;
+use App\Services\TransactionLogService;
 use App\Models\RiwayatStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class KonfirmasiController extends Controller
 {
-    public function __construct(private GadaiService $gadaiService, private NotifikasiService $notif) {}
+    public function __construct(
+        private GadaiService $gadaiService,
+        private NotifikasiService $notif,
+        private TransactionLogService $transactionLog,
+    ) {}
 
     public function index(Request $request)
     {
@@ -43,15 +48,10 @@ class KonfirmasiController extends Controller
         return view('pengurus.konfirmasi.index', compact('tab','pengajuan','pembayaranGadai','simpanan','registrasi','counts'));
     }
 
-    public function approvePengajuan(Request $request, PengajuanGadai $pengajuan)
+    public function approvePengajuan(PengajuanGadai $pengajuan)
     {
-        $request->validate([
-            'appraisal_value'    => 'required|numeric|min:1',
-            'loan_amount'        => 'required|numeric|min:1',
-            'warehouse_location' => 'nullable|string|max:255',
-        ]);
-        $this->gadaiService->approvePengajuan($pengajuan, $request->only('appraisal_value','loan_amount','warehouse_location'));
-        return back()->with('success', 'Pengajuan disetujui.');
+        $this->gadaiService->terimaPengajuan($pengajuan);
+        return back()->with('success', 'Pengajuan diterima. Anggota akan dihubungi untuk membawa barang ke koperasi.');
     }
 
     public function rejectPengajuan(Request $request, PengajuanGadai $pengajuan)
@@ -76,10 +76,25 @@ class KonfirmasiController extends Controller
 
     public function confirmSimpanan(Simpanan $simpanan)
     {
-        DB::transaction(function () use ($simpanan) {
-            $simpanan->update(['status' => 'confirmed', 'confirmed_by' => auth()->id(), 'confirmed_at' => now()]);
-            $this->notif->simpananDikonfirmasi($simpanan->anggota_id, $simpanan->type_label);
-        });
+        $logData = [
+            'transaction_type' => 'approval_simpanan',
+            'reference_id'     => $simpanan->id,
+            'reference_type'   => 'simpanan',
+            'anggota_id'       => $simpanan->anggota_id,
+            'amount'           => $simpanan->amount,
+            'description'      => "Simpanan {$simpanan->type_label} dikonfirmasi",
+        ];
+
+        try {
+            DB::transaction(function () use ($simpanan, $logData) {
+                $simpanan->update(['status' => 'confirmed', 'confirmed_by' => auth()->id(), 'confirmed_at' => now()]);
+                $this->notif->simpananDikonfirmasi($simpanan->anggota_id, $simpanan->type_label);
+                $this->transactionLog->log($logData);
+            });
+        } catch (\Throwable $e) {
+            $this->transactionLog->logFailure($logData, $e);
+            throw $e;
+        }
         return back()->with('success', 'Simpanan dikonfirmasi.');
     }
 
@@ -92,22 +107,53 @@ class KonfirmasiController extends Controller
 
     public function confirmRegistrasi(User $user)
     {
-        DB::transaction(function () use ($user) {
-            $user->update(['account_status' => 'active']);
-            RiwayatStatus::record('users', $user->id, 'pending', 'active');
-            $this->notif->registrasiDisetujui($user->id);
-        });
+        $logData = [
+            'transaction_type' => 'registrasi',
+            'reference_id'     => $user->id,
+            'reference_type'   => 'users',
+            'anggota_id'       => $user->id,
+            'amount'           => null,
+            'description'      => "Registrasi akun {$user->name} disetujui",
+        ];
+
+        try {
+            DB::transaction(function () use ($user, $logData) {
+                $user->update(['account_status' => 'active']);
+                RiwayatStatus::record('users', $user->id, 'pending', 'active');
+                $this->notif->registrasiDisetujui($user->id);
+                $this->transactionLog->log($logData);
+            });
+        } catch (\Throwable $e) {
+            $this->transactionLog->logFailure($logData, $e);
+            throw $e;
+        }
         return back()->with('success', "Registrasi {$user->name} disetujui.");
     }
 
     public function rejectRegistrasi(Request $request, User $user)
     {
         $request->validate(['reason' => 'required|string|max:500']);
-        DB::transaction(function () use ($request, $user) {
-            $user->update(['account_status' => 'rejected', 'rejection_reason' => $request->reason]);
-            RiwayatStatus::record('users', $user->id, 'pending', 'rejected', null, $request->reason);
-            $this->notif->registrasiDitolak($user->id, $request->reason);
-        });
+
+        $logData = [
+            'transaction_type' => 'registrasi',
+            'reference_id'     => $user->id,
+            'reference_type'   => 'users',
+            'anggota_id'       => $user->id,
+            'amount'           => null,
+            'description'      => "Registrasi akun {$user->name} ditolak: {$request->reason}",
+        ];
+
+        try {
+            DB::transaction(function () use ($request, $user, $logData) {
+                $user->update(['account_status' => 'rejected', 'rejection_reason' => $request->reason]);
+                RiwayatStatus::record('users', $user->id, 'pending', 'rejected', null, $request->reason);
+                $this->notif->registrasiDitolak($user->id, $request->reason);
+                $this->transactionLog->log($logData);
+            });
+        } catch (\Throwable $e) {
+            $this->transactionLog->logFailure($logData, $e);
+            throw $e;
+        }
         return back()->with('success', "Registrasi {$user->name} ditolak.");
     }
 }
