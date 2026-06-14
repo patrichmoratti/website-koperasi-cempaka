@@ -62,7 +62,7 @@ $title = 'Kirim Notifikasi';
             @error('message') <p class="form-error">{{ $message }}</p> @enderror
         </div>
 
-        <button type="submit" class="btn-primary" onclick="return confirm('Kirim notifikasi ini?')">
+        <button type="submit" class="btn-primary" onclick="return confirmAction(event, 'Kirim notifikasi ini?', 'Ya, Kirim')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
             Kirim Notifikasi
         </button>
