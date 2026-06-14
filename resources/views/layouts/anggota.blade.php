@@ -7,7 +7,7 @@
     <title>{{ $title ?? 'Anggota' }} â€” MONY KSP</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-mony-bg font-sans"
+<body class="h-full font-sans app-layout" style="background: var(--green)"
       x-data="{ sidebarOpen: window.innerWidth >= 1024 }"
       @resize.window="sidebarOpen = window.innerWidth >= 1024">
 
@@ -19,12 +19,7 @@
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
         <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-            <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
+            <img src="{{ asset('images/logo-mony.png') }}" alt="Logo MONY" class="w-9 h-9 rounded-xl object-contain flex-shrink-0">
             <div>
                 <p class="font-bold text-mony-text text-sm">MONY</p>
                 <p class="text-xs text-mony-muted">KSP Cempaka</p>
@@ -78,15 +73,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
-                Simpanan
-            </a>
-
-            <a href="{{ route('anggota.shu.index') }}"
-               class="sidebar-link {{ request()->routeIs('anggota.shu.*') ? 'active' : '' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                </svg>
-                SHU Saya
+                Keuangan Saya
             </a>
 
             <a href="{{ route('anggota.riwayat') }}"
@@ -148,24 +135,27 @@
     </aside>
 
     <div class="transition-all duration-200" :class="sidebarOpen ? 'lg:ml-64' : 'ml-0'">
-        <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+        <header class="sticky top-0 z-20 backdrop-blur px-4 py-3 flex items-center justify-between border-b"
+                style="background: rgba(15,42,30,0.92); border-color: rgba(255,255,255,0.1)">
             <div class="flex items-center gap-3">
                 <button @click="sidebarOpen = !sidebarOpen"
-                        class="p-2 rounded-lg text-mony-muted hover:bg-gray-100 transition-colors">
+                        class="p-2 rounded-lg transition-colors" style="color: rgba(255,255,255,0.7)"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'"
+                        onmouseout="this.style.background='transparent'; this.style.color='rgba(255,255,255,0.7)'">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
                 @isset($breadcrumbs)
-                    <nav class="hidden sm:flex items-center gap-1 text-sm text-mony-muted">
+                    <nav class="hidden sm:flex items-center gap-1 text-sm">
                         @foreach($breadcrumbs as $crumb)
                             @if(!$loop->last)
-                                <a href="{{ $crumb['url'] ?? '#' }}" class="hover:text-primary">{{ $crumb['label'] }}</a>
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <a href="{{ $crumb['url'] ?? '#' }}" class="transition-colors" style="color: rgba(255,255,255,0.55)" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">{{ $crumb['label'] }}</a>
+                                <svg class="w-3 h-3" style="color: rgba(255,255,255,0.4)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
                             @else
-                                <span class="text-mony-text font-medium">{{ $crumb['label'] }}</span>
+                                <span class="font-medium" style="color: white">{{ $crumb['label'] }}</span>
                             @endif
                         @endforeach
                     </nav>
@@ -173,7 +163,9 @@
             </div>
             <div class="flex items-center gap-3">
                 @php $unread = auth()->user()->unreadNotifikasi()->count() @endphp
-                <a href="{{ route('anggota.notifikasi.index') }}" class="relative p-2 rounded-lg text-mony-muted hover:bg-gray-100">
+                <a href="{{ route('anggota.notifikasi.index') }}" class="relative p-2 rounded-lg transition-colors" style="color: rgba(255,255,255,0.7)"
+                   onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'"
+                   onmouseout="this.style.background='transparent'; this.style.color='rgba(255,255,255,0.7)'">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
@@ -181,7 +173,7 @@
                         <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{{ $unread > 9 ? '9+' : $unread }}</span>
                     @endif
                 </a>
-                <span class="hidden sm:block text-sm font-medium text-mony-text">{{ auth()->user()->name }}</span>
+                <span class="hidden sm:block text-sm font-medium" style="color: white">{{ auth()->user()->name }}</span>
             </div>
         </header>
 
@@ -205,6 +197,8 @@
         </main>
     </div>
 
+    @include('partials.confirm-modal')
+    @include('partials.lightbox')
 </body>
 </html>
 
