@@ -36,7 +36,14 @@ class NotifikasiService
     public function pengajuanDiterima(int $anggotaId, string $refNumber): void
     {
         $this->send($anggotaId, 'update', 'Pengajuan Gadai Diterima',
-            "Selamat! Pengajuan gadai Anda ({$refNumber}) telah disetujui. Barang dapat diantar ke koperasi.",
+            "Pengajuan gadai Anda ({$refNumber}) diterima. Silakan bawa barang ke koperasi untuk penilaian.",
+            'pengajuan_gadai');
+    }
+
+    public function transaksiDibuat(int $anggotaId, string $refNumber): void
+    {
+        $this->send($anggotaId, 'update', 'Transaksi Gadai Aktif',
+            "Barang Anda telah dinilai. Transaksi gadai {$refNumber} kini aktif.",
             'transaksi_gadai');
     }
 
@@ -70,6 +77,12 @@ class NotifikasiService
     {
         $this->send($anggotaId, 'mendesak', 'Pendaftaran Ditolak',
             "Maaf, pendaftaran Anda ditolak. Alasan: {$reason}");
+    }
+
+    public function akunDiaktifkanKembali(int $anggotaId): void
+    {
+        $this->send($anggotaId, 'update', 'Akun Diaktifkan Kembali',
+            'Akun Anda telah diaktifkan kembali oleh admin. Anda sekarang dapat login dan menggunakan layanan MONY.');
     }
 
     public function jatuhTempoMendekat(int $anggotaId, string $refNumber, int $days): void

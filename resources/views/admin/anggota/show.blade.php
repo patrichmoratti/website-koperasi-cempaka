@@ -64,15 +64,23 @@ $title = 'Detail Anggota: ' . $user->name;
 
             @if($user->account_status === 'active')
                 <form method="POST" action="{{ route('admin.anggota.suspend', $user) }}"
-                      onsubmit="return confirm('Suspend akun ini?')">
+                      onsubmit="return confirmAction(event, 'Suspend akun ini?', 'Ya, Suspend')">
                     @csrf
                     <button class="btn-danger w-full">Suspend Akun</button>
                 </form>
             @endif
 
+            @if($user->account_status === 'suspended')
+                <form method="POST" action="{{ route('admin.anggota.reactivate', $user) }}"
+                      onsubmit="return confirmAction(event, 'Aktifkan kembali akun ini?', 'Ya, Aktifkan')">
+                    @csrf
+                    <button class="btn-success w-full">Aktifkan Kembali</button>
+                </form>
+            @endif
+
             @if($user->account_status !== 'pending')
                 <form method="POST" action="{{ route('admin.anggota.reset-password', $user) }}"
-                      onsubmit="return confirm('Reset password akun ini?')">
+                      onsubmit="return confirmAction(event, 'Reset password akun ini?', 'Ya, Reset')">
                     @csrf
                     <button class="btn-outline w-full">Reset Password</button>
                 </form>

@@ -41,4 +41,20 @@ class Notifikasi extends Model
             default     => $this->category,
         };
     }
+
+    /**
+     * Contextual icon key derived from the notification's subject —
+     * used by the UI to pick a fitting icon (no dedicated column for this).
+     */
+    public function getIconKeyAttribute(): string
+    {
+        if (str_contains($this->title, 'Simpanan'))     return 'simpanan';
+        if (str_contains($this->title, 'Pendaftaran'))  return 'registrasi';
+        if (str_contains($this->title, 'Jatuh Tempo'))  return 'jatuh_tempo';
+        if (str_contains($this->title, 'Pembayaran'))   return 'pembayaran';
+        if ($this->related_entity_type === 'pengajuan_gadai') return 'pengajuan';
+        if ($this->related_entity_type === 'transaksi_gadai') return 'gadai';
+
+        return 'default';
+    }
 }
