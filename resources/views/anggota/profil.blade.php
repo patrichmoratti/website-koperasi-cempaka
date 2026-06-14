@@ -3,9 +3,9 @@
 $title = 'Profil Saya';
 @endphp
 @section('content')
-<h1 class="page-title mb-6">Profil Saya</h1>
+<h1 class="text-2xl font-bold text-mony-text tracking-tight mb-6">Profil Saya</h1>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-3xl">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     {{-- Edit Profil --}}
     <div class="card p-6">
         <h3 class="section-title mb-4">Informasi Profil</h3>
