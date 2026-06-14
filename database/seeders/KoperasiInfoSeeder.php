@@ -12,7 +12,7 @@ class KoperasiInfoSeeder extends Seeder
         KoperasiInfo::updateOrCreate(['id' => 1], [
             'name'               => 'Koperasi Simpan Pinjam Cempaka',
             'vision'             => 'Menjadi koperasi simpan pinjam yang terpercaya, profesional, dan memberikan manfaat nyata bagi seluruh anggota.',
-            'mission'            => "1. Memberikan layanan simpan pinjam yang mudah dan terjangkau\n2. Meningkatkan kesejahteraan anggota melalui pengelolaan keuangan yang baik\n3. Menjalankan usaha gadai dengan transparan dan adil\n4. Mendistribusikan SHU secara merata kepada seluruh anggota aktif",
+            'mission'            => "1. Memberikan layanan simpan pinjam yang mudah dan terjangkau\n2. Meningkatkan kesejahteraan anggota melalui pengelolaan keuangan yang baik\n3. Menjalankan usaha gadai dengan transparan dan adil",
             'address'            => 'Jl. Cempaka Indah No. 12, Kecamatan Sukajadi, Kota Bandung, Jawa Barat 40152',
             'phone'              => '022-87654321',
             'email'              => 'info@kspcempaka.co.id',

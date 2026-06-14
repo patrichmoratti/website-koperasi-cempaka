@@ -33,7 +33,6 @@ class User extends Authenticatable
     public function pengajuanGadai()    { return $this->hasMany(PengajuanGadai::class, 'anggota_id'); }
     public function transaksiGadai()    { return $this->hasMany(TransaksiGadai::class, 'anggota_id'); }
     public function simpanan()          { return $this->hasMany(Simpanan::class, 'anggota_id'); }
-    public function shuDistributions()  { return $this->hasMany(ShuDistribution::class, 'anggota_id'); }
     public function notifikasi()        { return $this->hasMany(Notifikasi::class, 'user_id'); }
     public function unreadNotifikasi()  { return $this->notifikasi()->where('is_read', false); }
     public function sentPesan()         { return $this->hasMany(Pesan::class, 'sender_id'); }
