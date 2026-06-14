@@ -3,6 +3,20 @@
 $title = 'Katalog Barang Gadai';
 @endphp
 @section('content')
+@php
+    $catalogImages = [
+        'Laptop / Notebook' => 'laptop.jpg',
+        'Smartphone / HP' => 'handphone.jpg',
+        'TV / Televisi' => 'television.jpg',
+        'Kulkas / Lemari Es' => 'kulkas.webp',
+        'Rice Cooker / Magic Com' => 'rice-cooker.png',
+        'Kompor Gas' => 'kompor.jpg',
+        'Kipas Angin / AC' => 'kipas.jpeg',
+        'Perhiasan Emas' => 'perhiasan.jpg',
+        'Sepeda / Sepeda Listrik' => 'sepeda.jpg',
+        'Motor / Sepeda Motor' => 'motor.webp',
+    ];
+@endphp
 <div class="flex items-center justify-between mb-6">
     <h1 class="page-title">Katalog Jenis Barang Gadai</h1>
     <a href="{{ route('admin.katalog.create') }}" class="btn-primary">
@@ -30,6 +44,9 @@ $title = 'Katalog Barang Gadai';
             @if($item->image_path)
                 <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->name }}"
                      class="w-full h-full object-cover">
+            @elseif(isset($catalogImages[$item->name]))
+                <img src="{{ asset('images/' . $catalogImages[$item->name]) }}" alt="{{ $item->name }}"
+                     class="w-full h-full object-cover">
             @else
                 <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
@@ -46,15 +63,14 @@ $title = 'Katalog Barang Gadai';
                     {{ $item->is_active ? 'Aktif' : 'Nonaktif' }}
                 </span>
             </div>
-            <div class="flex items-center justify-between text-xs text-mony-muted mb-3">
-                <span>Max pinjaman: <strong class="text-primary">{{ $item->max_loan_percentage }}%</strong></span>
+            <div class="flex items-center justify-end text-xs text-mony-muted mb-3">
                 <span>{{ $item->unit }}</span>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('admin.katalog.edit', $item) }}" class="btn-outline btn-sm flex-1 text-center">Edit</a>
                 @if($item->is_active)
                     <form method="POST" action="{{ route('admin.katalog.destroy', $item) }}"
-                          onsubmit="return confirm('Nonaktifkan {{ $item->name }}?')">
+                          onsubmit="return confirmAction(event, 'Nonaktifkan {{ addslashes($item->name) }}?', 'Ya, Nonaktifkan')">
                         @csrf @method('DELETE')
                         <button class="btn-ghost btn-sm btn-icon text-red-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
